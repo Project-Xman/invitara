@@ -1,6 +1,7 @@
 import { useCountdown, useFormattedDate } from "./shared/hooks";
 import { SectionReveal } from "./shared/SectionReveal";
 import type { TemplateProps } from "./shared/types";
+import { PhotoGallery } from "./shared/PhotoGallery";
 
 export default function WhimsicalTemplate({
   invitation: inv,
@@ -396,6 +397,11 @@ export default function WhimsicalTemplate({
           Made with \u2665 by Invitara
         </p>
       </div>
+
+      {/* Photo Gallery */}
+      {(inv.photos ?? []).length > 0 && (
+        <PhotoGallery photos={inv.photos ?? []} accentColor={tc.secondary} />
+      )}
     </div>
   );
 }

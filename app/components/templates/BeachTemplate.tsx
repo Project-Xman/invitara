@@ -1,5 +1,6 @@
 import { useCountdown, useFormattedDate } from "./shared/hooks";
 import { SectionReveal } from "./shared/SectionReveal";
+import { PhotoGallery } from "./shared/PhotoGallery";
 import type { TemplateProps } from "./shared/types";
 
 export default function BeachTemplate({
@@ -328,9 +329,16 @@ export default function BeachTemplate({
           className="mt-6 font-sans text-[10px] tracking-[1px] opacity-15"
           style={{ color: tc.text }}
         >
-          Made with \u2665 by Invitara
+          Made with ♥ by Invitara
         </p>
       </div>
+
+      {/* Photo Gallery — rendered if photos are uploaded */}
+      {(inv.photos ?? []).length > 0 && (
+        <SectionReveal>
+          <PhotoGallery photos={inv.photos ?? []} accentColor={tc.secondary} />
+        </SectionReveal>
+      )}
     </div>
   );
 }

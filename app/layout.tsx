@@ -2,10 +2,44 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Providers } from "./providers";
 import { Navigation } from "./components/Navigation";
-import { Inter } from "next/font/google";
+import {
+  Inter,
+  Playfair_Display,
+  Cormorant_Garamond,
+  Great_Vibes,
+  Cinzel,
+  Dancing_Script,
+} from "next/font/google";
 import { cn } from "@/lib/utils";
 
-const inter = Inter({subsets:['latin'],variable:'--font-sans'});
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  variable: "--font-display",
+  weight: ["400", "500", "600", "700", "800"],
+  style: ["normal", "italic"],
+});
+const cormorant = Cormorant_Garamond({
+  subsets: ["latin"],
+  variable: "--font-body",
+  weight: ["300", "400", "500", "600", "700"],
+  style: ["normal", "italic"],
+});
+const greatVibes = Great_Vibes({
+  subsets: ["latin"],
+  variable: "--font-script",
+  weight: ["400"],
+});
+const cinzel = Cinzel({
+  subsets: ["latin"],
+  variable: "--font-heading",
+  weight: ["400", "500", "600", "700"],
+});
+const dancingScript = Dancing_Script({
+  subsets: ["latin"],
+  variable: "--font-handwritten",
+  weight: ["400", "500", "600", "700"],
+});
 
 export const metadata: Metadata = {
   title: "Invitara — Golden Wedding Invitations",
@@ -15,16 +49,21 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={cn("font-sans", inter.variable)}>
+    <html
+      lang="en"
+      className={cn(
+        "font-sans",
+        inter.variable,
+        playfair.variable,
+        cormorant.variable,
+        greatVibes.variable,
+        cinzel.variable,
+        dancingScript.variable
+      )}
+    >
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&family=Great+Vibes&family=Cinzel:wght@400;500;600;700&family=Dancing+Script:wght@400;500;600;700&display=swap"
-        />
       </head>
       <body className="bg-cream-100 font-sans text-cream-900 antialiased">
         <Providers>

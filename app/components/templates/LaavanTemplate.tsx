@@ -1,6 +1,7 @@
 import { useCountdown, useFormattedDate } from "./shared/hooks";
 import { SectionReveal } from "./shared/SectionReveal";
 import type { TemplateProps } from "./shared/types";
+import { PhotoGallery } from "./shared/PhotoGallery";
 
 const FOUR_LAAVAN = [
   { num: 1, text: "The first Laav - Begin the journey of love and dharma together." },
@@ -394,6 +395,11 @@ export default function LaavanTemplate({
           </p>
         </div>
       </div>
+
+      {/* Photo Gallery */}
+      {(inv.photos ?? []).length > 0 && (
+        <PhotoGallery photos={inv.photos ?? []} accentColor={tc.secondary} />
+      )}
     </div>
   );
 }

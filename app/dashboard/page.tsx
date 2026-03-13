@@ -10,11 +10,18 @@ import {
   rsvpsQueryOptions,
   analyticsQueryOptions,
   eventsQueryOptions,
+  useDeleteInvitation,
+  useUnpublishInvitation,
 } from "~/lib/queries";
+import dynamic from "next/dynamic";
 import { RsvpTable } from "~/components/RsvpTable";
 import { ShareModal } from "~/components/ShareModal";
-import { AnalyticsChart } from "~/components/AnalyticsChart";
 import { AdBanner } from "~/components/AdBanner";
+
+const AnalyticsChart = dynamic(
+  () => import("~/components/AnalyticsChart").then((m) => ({ default: m.AnalyticsChart })),
+  { ssr: false }
+);
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -23,6 +30,10 @@ export default function DashboardPage() {
 
   const [selectedInvId, setSelectedInvId] = useState<string | undefined>(undefined);
   const [showShare, setShowShare] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+
+  const deleteInv = useDeleteInvitation();
+  const unpublishInv = useUnpublishInvitation();
 
   // Use the first invitation by default once list loads
   const activeInvId = selectedInvId ?? (myInvitations[0] as any)?.id;
@@ -181,9 +192,62 @@ export default function DashboardPage() {
               >
                 Preview
               </Link>
+              {activeInv?.published && (
+                <button
+                  className="btn-gold-outline !px-6 !py-2.5 !text-[10px]"
+                  onClick={() => unpublishInv.mutate(activeInvId)}
+                  disabled={unpublishInv.isPending}
+                >
+                  {unpublishInv.isPending ? "Unpublishing…" : "Unpublish"}
+                </button>
+              )}
+              <button
+                className="rounded-full border border-red-300/50 bg-white px-6 py-2.5 text-[10px] font-semibold uppercase tracking-[1px] text-red-500 transition-colors hover:bg-red-50"
+                onClick={() => setConfirmDelete(activeInvId)}
+              >
+                Delete
+              </button>
             </>
           )}
         </div>
+
+        {/* Delete confirmation modal */}
+        {confirmDelete && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 p-6">
+            <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl">
+              <h3 className="mb-2 font-display text-xl font-bold">Delete Invitation?</h3>
+              <p className="mb-6 text-sm opacity-60">
+                This will permanently delete the invitation and all its events, RSVPs, and
+                analytics. This action cannot be undone.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  className="flex-1 rounded-full border border-red-300 bg-red-50 py-2.5 text-[10px] font-bold uppercase tracking-[1px] text-red-600 hover:bg-red-100"
+                  onClick={() => {
+                    deleteInv.mutate(
+                      confirmDelete,
+                      {
+                        onSuccess: () => {
+                          setConfirmDelete(null);
+                          setSelectedInvId(undefined);
+                        },
+                      }
+                    );
+                  }}
+                  disabled={deleteInv.isPending}
+                >
+                  {deleteInv.isPending ? "Deleting…" : "Yes, Delete"}
+                </button>
+                <button
+                  className="flex-1 rounded-full border border-gold-200/30 bg-cream-50 py-2.5 text-[10px] font-bold uppercase tracking-[1px]"
+                  onClick={() => setConfirmDelete(null)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Stats */}
         <div className="mb-10 grid grid-cols-2 gap-4 lg:grid-cols-4">

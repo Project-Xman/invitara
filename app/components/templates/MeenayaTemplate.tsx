@@ -1,6 +1,7 @@
 import { useCountdown, useFormattedDate } from "./shared/hooks";
 import { SectionReveal } from "./shared/SectionReveal";
 import type { TemplateProps } from "./shared/types";
+import { PhotoGallery } from "./shared/PhotoGallery";
 
 export default function MeenayaTemplate({
   invitation: inv,
@@ -379,6 +380,11 @@ export default function MeenayaTemplate({
           </p>
         </div>
       </div>
+
+      {/* Photo Gallery */}
+      {(inv.photos ?? []).length > 0 && (
+        <PhotoGallery photos={inv.photos ?? []} accentColor={tc.secondary} />
+      )}
     </div>
   );
 }

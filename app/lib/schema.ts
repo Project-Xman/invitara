@@ -354,3 +354,13 @@ export const templatePurchasesRelations = relations(templatePurchases, ({ one })
   user: one(users, { fields: [templatePurchases.userId], references: [users.id] }),
   template: one(templates, { fields: [templatePurchases.templateId], references: [templates.id] }),
 }));
+
+export const analyticsEventsRelations = relations(analyticsEvents, ({ one }) => ({
+  invitation: one(invitations, { fields: [analyticsEvents.invitationId], references: [invitations.id] }),
+  user: one(users, { fields: [analyticsEvents.userId], references: [users.id] }),
+}));
+
+export const aiGenerationsRelations = relations(aiGenerations, ({ one }) => ({
+  user: one(users, { fields: [aiGenerations.userId], references: [users.id] }),
+  invitation: one(invitations, { fields: [aiGenerations.invitationId], references: [invitations.id] }),
+}));

@@ -28,6 +28,8 @@ export interface InvitationData {
   hashtag?: string | null;
   weddingDate?: Date | string | null;
   venue?: string | null;
+  photos?: string[] | null;
+  musicUrl?: string | null;
 }
 
 export interface TemplateProps {

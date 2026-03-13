@@ -1,6 +1,13 @@
 import { queryOptions, useMutation, useQueryClient } from "@tanstack/react-query";
 import * as actions from "./actions";
 
+// ━━━ ERROR HANDLER ━━━
+function handleMutationError(error: unknown, context?: string) {
+  const message = error instanceof Error ? error.message : "Something went wrong";
+  const label = context ? `[${context}] ` : "";
+  console.error(`${label}${message}`);
+}
+
 // ━━━ AUTH ━━━
 export const sessionQueryOptions = () =>
   queryOptions({
@@ -17,6 +24,7 @@ export function useRegister() {
     onSuccess: (user) => {
       qc.setQueryData(["session"], user);
     },
+    onError: (error) => handleMutationError(error, "Register"),
   });
 }
 
@@ -27,6 +35,7 @@ export function useLogin() {
     onSuccess: (user) => {
       qc.setQueryData(["session"], user);
     },
+    onError: (error) => handleMutationError(error, "Login"),
   });
 }
 
@@ -38,6 +47,7 @@ export function useLogout() {
       qc.setQueryData(["session"], null);
       qc.invalidateQueries();
     },
+    onError: (error) => handleMutationError(error, "Logout"),
   });
 }
 
@@ -46,18 +56,30 @@ export const templatesQueryOptions = (category?: string) =>
   queryOptions({
     queryKey: ["templates", category ?? "All"],
     queryFn: () => actions.getTemplates({ category }),
-    staleTime: 5 * 60_000,
+    staleTime: 10 * 60_000,
   });
 
 export const myTemplatesQueryOptions = () =>
-  queryOptions({ queryKey: ["my-templates"], queryFn: () => actions.getMyTemplates() });
+  queryOptions({
+    queryKey: ["my-templates"],
+    queryFn: () => actions.getMyTemplates(),
+    staleTime: 10 * 60_000,
+  });
 
 // ━━━ INVITATIONS ━━━
 export const myInvitationsQueryOptions = () =>
-  queryOptions({ queryKey: ["my-invitations"], queryFn: () => actions.getMyInvitations() });
+  queryOptions({
+    queryKey: ["my-invitations"],
+    queryFn: () => actions.getMyInvitations(),
+    staleTime: 30_000,
+  });
 
 export const invitationQueryOptions = (id: string) =>
-  queryOptions({ queryKey: ["invitation", id], queryFn: () => actions.getInvitation({ id }) });
+  queryOptions({
+    queryKey: ["invitation", id],
+    queryFn: () => actions.getInvitation({ id }),
+    staleTime: 30_000,
+  });
 
 export function useSaveInvitation() {
   const qc = useQueryClient();
@@ -68,6 +90,7 @@ export function useSaveInvitation() {
       if (vars.id) qc.invalidateQueries({ queryKey: ["invitation", vars.id] });
       qc.invalidateQueries({ queryKey: ["my-invitations"] });
     },
+    onError: (error) => handleMutationError(error, "Save invitation"),
   });
 }
 
@@ -78,6 +101,7 @@ export function usePublishInvitation() {
     onSuccess: (_res, id) => {
       qc.invalidateQueries({ queryKey: ["invitation", id] });
     },
+    onError: (error) => handleMutationError(error, "Publish invitation"),
   });
 }
 
@@ -88,6 +112,7 @@ export function useUnpublishInvitation() {
     onSuccess: (_res, id) => {
       qc.invalidateQueries({ queryKey: ["invitation", id] });
     },
+    onError: (error) => handleMutationError(error, "Unpublish invitation"),
   });
 }
 
@@ -96,6 +121,7 @@ export const eventsQueryOptions = (invitationId: string) =>
   queryOptions({
     queryKey: ["events", invitationId],
     queryFn: () => actions.getEvents({ invitationId }),
+    staleTime: 30_000,
   });
 
 export function useAddEvent() {
@@ -103,6 +129,7 @@ export function useAddEvent() {
   return useMutation({
     mutationFn: (data: Parameters<typeof actions.addEvent>[0]) => actions.addEvent(data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["events"] }),
+    onError: (error) => handleMutationError(error, "Add event"),
   });
 }
 
@@ -111,6 +138,7 @@ export function useRemoveEvent() {
   return useMutation({
     mutationFn: (id: number) => actions.removeEvent({ id }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["events"] }),
+    onError: (error) => handleMutationError(error, "Remove event"),
   });
 }
 
@@ -119,6 +147,7 @@ export const rsvpsQueryOptions = (invitationId: string) =>
   queryOptions({
     queryKey: ["rsvps", invitationId],
     queryFn: () => actions.getRsvps({ invitationId }),
+    staleTime: 30_000,
   });
 
 export function useUpdateRsvpStatus() {
@@ -126,13 +155,42 @@ export function useUpdateRsvpStatus() {
   return useMutation({
     mutationFn: (data: { id: number; status: "attending" | "pending" | "declined" }) =>
       actions.updateRsvpStatus(data),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["rsvps"] }),
+
+    onMutate: async ({ id, status }) => {
+      // Cancel any in-flight refetches to avoid overwriting optimistic update
+      await qc.cancelQueries({ queryKey: ["rsvps"] });
+      // Snapshot all rsvp queries for rollback
+      const snapshot = qc.getQueriesData<any[]>({ queryKey: ["rsvps"] });
+      // Optimistically update every matching cache entry
+      qc.setQueriesData<any[]>({ queryKey: ["rsvps"] }, (old) => {
+        if (!old) return old;
+        return old.map((r) => (r.id === id ? { ...r, status } : r));
+      });
+      return { snapshot };
+    },
+
+    onError: (error, _vars, context) => {
+      // Roll back to snapshot on error
+      if (context?.snapshot) {
+        for (const [queryKey, data] of context.snapshot) {
+          qc.setQueryData(queryKey, data);
+        }
+      }
+      handleMutationError(error, "Update RSVP status");
+    },
+
+    onSettled: () => qc.invalidateQueries({ queryKey: ["rsvps"] }),
   });
 }
 
 // ━━━ CREDITS ━━━
 export const creditsQueryOptions = () =>
-  queryOptions({ queryKey: ["credits"], queryFn: () => actions.getMyCredits() });
+  queryOptions({
+    queryKey: ["credits"],
+    queryFn: () => actions.getMyCredits(),
+    staleTime: 30_000,
+  });
+
 export const creditPacksQueryOptions = () =>
   queryOptions({
     queryKey: ["credit-packs"],
@@ -149,6 +207,7 @@ export function useGenerateAIDesign() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["credits"] });
     },
+    onError: (error) => handleMutationError(error, "AI design generation"),
   });
 }
 
@@ -157,6 +216,7 @@ export const analyticsQueryOptions = (invitationId: string) =>
   queryOptions({
     queryKey: ["analytics", invitationId],
     queryFn: () => actions.getAnalytics({ invitationId }),
+    staleTime: 5 * 60_000,
   });
 
 // ━━━ ADS ━━━
@@ -186,6 +246,7 @@ export function useSubmitRsvp() {
     onSuccess: (_res, vars) => {
       qc.invalidateQueries({ queryKey: ["rsvps", vars.invitationId] });
     },
+    onError: (error) => handleMutationError(error, "Submit RSVP"),
   });
 }
 
@@ -197,6 +258,7 @@ export function useDeleteInvitation() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["my-invitations"] });
     },
+    onError: (error) => handleMutationError(error, "Delete invitation"),
   });
 }
 
@@ -204,6 +266,7 @@ export function useDeleteInvitation() {
 export function useCreateOrder() {
   return useMutation({
     mutationFn: (data: Parameters<typeof actions.createOrder>[0]) => actions.createOrder(data),
+    onError: (error) => handleMutationError(error, "Create order"),
   });
 }
 
@@ -215,6 +278,7 @@ export function usePurchasePlan() {
       qc.invalidateQueries({ queryKey: ["session"] });
       qc.invalidateQueries({ queryKey: ["credits"] });
     },
+    onError: (error) => handleMutationError(error, "Plan purchase"),
   });
 }
 
@@ -226,6 +290,7 @@ export function useBuyCredits() {
       qc.invalidateQueries({ queryKey: ["credits"] });
       qc.invalidateQueries({ queryKey: ["session"] });
     },
+    onError: (error) => handleMutationError(error, "Buy credits"),
   });
 }
 
@@ -236,22 +301,29 @@ export function useBuyTemplate() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["my-templates"] });
     },
+    onError: (error) => handleMutationError(error, "Buy template"),
   });
 }
 
 // ━━━ PAYMENT HISTORY ━━━
 export const paymentHistoryQueryOptions = () =>
-  queryOptions({ queryKey: ["payment-history"], queryFn: () => actions.getPaymentHistory() });
+  queryOptions({
+    queryKey: ["payment-history"],
+    queryFn: () => actions.getPaymentHistory(),
+    staleTime: 5 * 60_000,
+  });
 
 // ━━━ PASSWORD RESET ━━━
 export function useForgotPassword() {
   return useMutation({
     mutationFn: (data: { email: string }) => actions.forgotPassword(data),
+    onError: (error) => handleMutationError(error, "Forgot password"),
   });
 }
 
 export function useResetPassword() {
   return useMutation({
     mutationFn: (data: { token: string; password: string }) => actions.resetPassword(data),
+    onError: (error) => handleMutationError(error, "Reset password"),
   });
 }

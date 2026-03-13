@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
 import { db } from "~/lib/drizzle";
-import { users } from "~/lib/schema";
+import { users, payments } from "~/lib/schema";
 import { eq } from "drizzle-orm";
 import { env } from "~/lib/env";
 import { upgradePlan, purchaseTemplate } from "~/lib/purchases";
@@ -28,7 +28,12 @@ export async function POST(request: Request) {
   hmac.update(rawBody);
   const expected = hmac.digest("hex");
 
-  if (expected !== signature) {
+  const expectedBuf = Buffer.from(expected, "hex");
+  const signatureBuf = Buffer.from(signature, "hex");
+  const valid =
+    expectedBuf.length === signatureBuf.length &&
+    crypto.timingSafeEqual(expectedBuf, signatureBuf);
+  if (!valid) {
     return Response.json({ error: "Invalid signature" }, { status: 401 });
   }
 
@@ -45,10 +50,47 @@ export async function POST(request: Request) {
   if (event === "payment.captured" && payment) {
     await handlePaymentCaptured(payment);
   } else if (event === "payment.failed" && payment) {
-    console.log("[Webhook] payment.failed:", payment.id);
+    await handlePaymentFailed(payment);
   }
 
   return Response.json({ ok: true });
+}
+
+async function handlePaymentFailed(payment: any) {
+  const paymentId: string = payment.id;
+  const notes: Record<string, string> = payment.notes ?? {};
+  const { type, userId } = notes;
+
+  const VALID_TYPES = ["subscription", "credits", "template"] as const;
+  type ValidType = (typeof VALID_TYPES)[number];
+
+  if (!type || !userId) {
+    console.warn("[Webhook] payment.failed missing type/userId:", paymentId);
+    return;
+  }
+  if (!VALID_TYPES.includes(type as ValidType)) {
+    console.warn("[Webhook] payment.failed invalid type:", type, paymentId);
+    return;
+  }
+
+  try {
+    await db.insert(payments).values({
+      userId,
+      type: type as ValidType,
+      amount: String((payment.amount ?? 0) / 100),
+      currency: payment.currency ?? "INR",
+      status: "failed",
+      razorpayPaymentId: paymentId,
+      metadata: {
+        error_code: payment.error_code ?? null,
+        error_description: payment.error_description ?? null,
+        notes,
+      },
+    });
+    console.log(`[Webhook] payment.failed recorded: user=${userId} payment=${paymentId}`);
+  } catch (err) {
+    console.error("[Webhook] handlePaymentFailed error:", err);
+  }
 }
 
 async function handlePaymentCaptured(payment: any) {
@@ -56,8 +98,14 @@ async function handlePaymentCaptured(payment: any) {
   const notes: Record<string, string> = payment.notes ?? {};
   const { type, userId, plan, packageId, templateId } = notes;
 
+  const VALID_TYPES_CAPTURED = ["subscription", "credits", "template"] as const;
+
   if (!type || !userId) {
     console.warn("[Webhook] payment.captured missing type/userId in notes:", paymentId);
+    return;
+  }
+  if (!VALID_TYPES_CAPTURED.includes(type as any)) {
+    console.warn("[Webhook] payment.captured invalid type:", type, paymentId);
     return;
   }
 

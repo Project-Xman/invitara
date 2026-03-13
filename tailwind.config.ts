@@ -6,12 +6,12 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["Inter", "sans-serif"],
-        display: ["Playfair Display", "serif"],
-        script: ["Great Vibes", "cursive"],
-        body: ["Cormorant Garamond", "serif"],
-        heading: ["Cinzel", "serif"],
-        handwritten: ["Dancing Script", "cursive"],
+        sans: ["var(--font-sans)", "sans-serif"],
+        display: ["var(--font-display)", "serif"],
+        script: ["var(--font-script)", "cursive"],
+        body: ["var(--font-body)", "serif"],
+        heading: ["var(--font-heading)", "serif"],
+        handwritten: ["var(--font-handwritten)", "cursive"],
       },
       colors: {
         gold: {

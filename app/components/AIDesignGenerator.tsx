@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import Link from "next/link";
 import { useGenerateAIDesign } from "~/lib/queries";
 import type { SafeUser } from "~/lib/auth";
 
@@ -26,7 +27,7 @@ export function AIDesignGenerator({
   const generate = useGenerateAIDesign();
 
   // Check Nano availability on mount
-  useState(() => {
+  useEffect(() => {
     if (typeof window !== "undefined" && "ai" in window) {
       (window as any).ai?.languageModel
         ?.capabilities?.()
@@ -37,7 +38,7 @@ export function AIDesignGenerator({
     } else {
       setNanoAvailable(false);
     }
-  });
+  }, []);
 
   const handleGenerate = async () => {
     if (!prompt.trim()) return;
@@ -51,7 +52,12 @@ export function AIDesignGenerator({
         });
         const raw = await session.prompt(`Design a ${style} wedding invitation: ${prompt}`);
         session.destroy();
-        const parsed = JSON.parse(raw);
+        // Strip any accidental markdown fences before parsing
+        const cleaned = raw.replace(/```(?:json)?/gi, "").trim();
+        const parsed = JSON.parse(cleaned);
+        if (!parsed?.gradient || !parsed?.colors?.primary) {
+          throw new Error("Nano returned incomplete design object");
+        }
         setResult({ ...parsed, model: "gemini-nano", creditsCost: 0 });
         setNanoLoading(false);
         return;
@@ -93,9 +99,9 @@ export function AIDesignGenerator({
 
       {/* Style selector */}
       <div>
-        <label className="mb-3 block text-[10px] font-semibold uppercase tracking-[2px] text-cream-800/40">
+        <p className="mb-3 text-[10px] font-semibold uppercase tracking-[2px] text-cream-800/40">
           Design Style
-        </label>
+        </p>
         <div className="grid grid-cols-3 gap-2">
           {STYLES.map((s) => (
             <button
@@ -116,10 +122,11 @@ export function AIDesignGenerator({
 
       {/* Prompt */}
       <div>
-        <label className="mb-2 block text-[10px] font-semibold uppercase tracking-[2px] text-cream-800/40">
+        <label htmlFor="ai-prompt" className="mb-2 block text-[10px] font-semibold uppercase tracking-[2px] text-cream-800/40">
           Describe Your Dream Design
         </label>
         <textarea
+          id="ai-prompt"
           className="input-gold min-h-[100px] resize-y"
           placeholder="e.g. A warm golden sunset beach wedding with tropical flowers and elegant calligraphy..."
           value={prompt}
@@ -152,9 +159,9 @@ export function AIDesignGenerator({
       {!nanoAvailable && credits < 1 && (
         <p className="text-center text-xs text-red-500/70">
           Not enough credits.{" "}
-          <a href="/account" className="font-semibold underline">
+          <Link href="/account" className="font-semibold underline">
             Buy more credits →
-          </a>
+          </Link>
         </p>
       )}
 
@@ -184,9 +191,9 @@ export function AIDesignGenerator({
           {/* Color palette */}
           {result.colors && (
             <div>
-              <label className="mb-2 block text-[10px] font-semibold uppercase tracking-[2px] text-cream-800/40">
+              <p className="mb-2 text-[10px] font-semibold uppercase tracking-[2px] text-cream-800/40">
                 Color Palette
-              </label>
+              </p>
               <div className="flex gap-2">
                 {Object.entries(result.colors).map(([k, v]) => (
                   <div key={k} className="text-center">
@@ -204,9 +211,9 @@ export function AIDesignGenerator({
           {/* Suggestions */}
           {result.suggestions && (
             <div>
-              <label className="mb-2 block text-[10px] font-semibold uppercase tracking-[2px] text-cream-800/40">
+              <p className="mb-2 text-[10px] font-semibold uppercase tracking-[2px] text-cream-800/40">
                 AI Suggestions
-              </label>
+              </p>
               <div className="space-y-1.5">
                 {result.suggestions.map((s: string, i: number) => (
                   <div key={i} className="flex items-start gap-2 text-xs opacity-55">

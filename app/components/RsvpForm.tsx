@@ -85,10 +85,11 @@ export function RsvpForm({ invitationId, events }: Props) {
 
       {/* Name */}
       <div>
-        <label className="mb-2 block text-[10px] font-semibold uppercase tracking-[2px] text-cream-800/40">
+        <label htmlFor="rsvp-name" className="mb-2 block text-[10px] font-semibold uppercase tracking-[2px] text-cream-800/40">
           Your Name <span className="text-gold-500">*</span>
         </label>
         <input
+          id="rsvp-name"
           className="input-gold"
           placeholder="e.g. Rahul & Priya Sharma"
           value={name}
@@ -100,10 +101,11 @@ export function RsvpForm({ invitationId, events }: Props) {
       {/* Phone + Email */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div>
-          <label className="mb-2 block text-[10px] font-semibold uppercase tracking-[2px] text-cream-800/40">
+          <label htmlFor="rsvp-phone" className="mb-2 block text-[10px] font-semibold uppercase tracking-[2px] text-cream-800/40">
             Phone
           </label>
           <input
+            id="rsvp-phone"
             className="input-gold"
             placeholder="+91 98765 43210"
             value={phone}
@@ -111,10 +113,11 @@ export function RsvpForm({ invitationId, events }: Props) {
           />
         </div>
         <div>
-          <label className="mb-2 block text-[10px] font-semibold uppercase tracking-[2px] text-cream-800/40">
+          <label htmlFor="rsvp-email" className="mb-2 block text-[10px] font-semibold uppercase tracking-[2px] text-cream-800/40">
             Email
           </label>
           <input
+            id="rsvp-email"
             type="email"
             className="input-gold"
             placeholder="you@email.com"
@@ -126,9 +129,9 @@ export function RsvpForm({ invitationId, events }: Props) {
 
       {/* Guest count */}
       <div>
-        <label className="mb-2 block text-[10px] font-semibold uppercase tracking-[2px] text-cream-800/40">
+        <p className="mb-2 text-[10px] font-semibold uppercase tracking-[2px] text-cream-800/40">
           Number of Guests
-        </label>
+        </p>
         <div className="flex items-center gap-3">
           <button
             type="button"
@@ -152,9 +155,9 @@ export function RsvpForm({ invitationId, events }: Props) {
       {/* Events attending */}
       {events.length > 0 && (
         <div>
-          <label className="mb-3 block text-[10px] font-semibold uppercase tracking-[2px] text-cream-800/40">
+          <p className="mb-3 text-[10px] font-semibold uppercase tracking-[2px] text-cream-800/40">
             Which events will you attend?
-          </label>
+          </p>
           <div className="grid grid-cols-2 gap-2">
             {events.map((ev) => {
               const selected = eventsAttending.includes(ev.name);
@@ -193,10 +196,11 @@ export function RsvpForm({ invitationId, events }: Props) {
 
       {/* Message */}
       <div>
-        <label className="mb-2 block text-[10px] font-semibold uppercase tracking-[2px] text-cream-800/40">
+        <label htmlFor="rsvp-message" className="mb-2 block text-[10px] font-semibold uppercase tracking-[2px] text-cream-800/40">
           Message (optional)
         </label>
         <textarea
+          id="rsvp-message"
           className="input-gold min-h-[80px] resize-y"
           placeholder="Leave a heartfelt message for the couple…"
           value={message}

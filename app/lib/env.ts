@@ -22,7 +22,9 @@ export const env = {
   RAZORPAY_KEY_ID: process.env.RAZORPAY_KEY_ID ?? "",
   RAZORPAY_KEY_SECRET: process.env.RAZORPAY_KEY_SECRET ?? "",
   RAZORPAY_WEBHOOK_SECRET: process.env.RAZORPAY_WEBHOOK_SECRET ?? "",
-  STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY ?? "",
+
+  // File storage (Vercel Blob — required for photo/music uploads)
+  BLOB_READ_WRITE_TOKEN: process.env.BLOB_READ_WRITE_TOKEN ?? "",
 
   // Email (optional — required for password reset / verification in production)
   RESEND_API_KEY: process.env.RESEND_API_KEY ?? "",

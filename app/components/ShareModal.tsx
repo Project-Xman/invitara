@@ -25,14 +25,19 @@ export function ShareModal({
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(`You're invited! 💌\n${groomName} weds ${brideName}\n\n${link}`)}`;
+  const shareText = `You're invited! 💌\n${groomName} weds ${brideName}\n\n${link}`;
+  const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
   const emailUrl = `mailto:?subject=${encodeURIComponent(`${groomName} & ${brideName}'s Wedding Invitation`)}&body=${encodeURIComponent(`You're cordially invited!\n\nView our invitation: ${link}`)}`;
   const smsUrl = `sms:?body=${encodeURIComponent(`You're invited to ${groomName} & ${brideName}'s wedding! ${link}`)}`;
+  const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(`${groomName} & ${brideName} are getting married! 💍 ${link}`)}`;
+  const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(link)}`;
 
   const channels = [
     { icon: "💬", name: "WhatsApp", href: whatsappUrl },
     { icon: "✉️", name: "Email", href: emailUrl },
     { icon: "💌", name: "SMS", href: smsUrl },
+    { icon: "🐦", name: "Twitter / X", href: twitterUrl },
+    { icon: "👥", name: "Facebook", href: facebookUrl },
     { icon: "📋", name: "Copy Link", href: undefined },
   ];
 
@@ -65,7 +70,7 @@ export function ShareModal({
             {copied ? "✓ Copied!" : "Copy"}
           </button>
         </div>
-        <div className="mb-6 grid grid-cols-2 gap-3">
+        <div className="mb-6 grid grid-cols-3 gap-3">
           {channels.map((ch) => (
             <button
               key={ch.name}

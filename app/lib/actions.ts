@@ -183,8 +183,20 @@ export async function getMyInvitations() {
 }
 
 export async function getInvitation(data: { id: string }) {
-  const [inv] = await db.select().from(invitations).where(eq(invitations.id, data.id));
-  return inv || null;
+  const token = await getTokenFromCookies();
+  if (!token) throw new Error("Not authenticated");
+  const user = await validateSession(token);
+  if (!user) throw new Error("Not authenticated");
+
+  const [inv] = await db
+    .select()
+    .from(invitations)
+    .where(eq(invitations.id, data.id))
+    .limit(1);
+
+  if (!inv) return null;
+  if (inv.userId !== user.id) throw new Error("Forbidden");
+  return inv;
 }
 
 export async function saveInvitation(data: {
@@ -203,6 +215,8 @@ export async function saveInvitation(data: {
   mapLink?: string;
   instagramLink?: string;
   whatsappNumber?: string;
+  photos?: string[];
+  musicUrl?: string;
 }): Promise<{ id: string; slug: string | undefined }> {
   const token = await getTokenFromCookies();
   if (!token) throw new Error("Not authenticated");
@@ -572,7 +586,13 @@ function verifyRazorpaySignature(orderId: string, paymentId: string, signature: 
   if (!env.RAZORPAY_KEY_SECRET) return false;
   const hmac = crypto.createHmac("sha256", env.RAZORPAY_KEY_SECRET);
   hmac.update(`${orderId}|${paymentId}`);
-  return hmac.digest("hex") === signature;
+  const expected = hmac.digest("hex");
+  const expectedBuf = Buffer.from(expected, "hex");
+  const signatureBuf = Buffer.from(signature, "hex");
+  return (
+    expectedBuf.length === signatureBuf.length &&
+    crypto.timingSafeEqual(expectedBuf, signatureBuf)
+  );
 }
 
 async function createRazorpayOrder(
