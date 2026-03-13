@@ -1,0 +1,44 @@
+version: "3.9"
+
+services:
+  # ━━━ PostgreSQL Database ━━━
+  postgres:
+    image: postgres:16-alpine
+    container_name: invitara-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: invitara
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d invitara"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ━━━ Drizzle Studio (DB GUI) ━━━
+  # Run: npm run db:studio
+  # Opens at https://local.drizzle.studio
+
+  # ━━━ App (Optional — for production) ━━━
+  app:
+    build: .
+    container_name: invitara-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/invitara
+      JWT_SECRET: change-this-in-production-to-random-64-char-string
+      NODE_ENV: production
+      PORT: 3000
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  pgdata:
