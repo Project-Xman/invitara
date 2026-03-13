@@ -11,7 +11,10 @@ const STYLES = [
   { id: "royal", label: "Royal", emoji: "🏰", desc: "Regal opulence" },
 ];
 
-export function AIDesignGenerator({ user, onApply }: {
+export function AIDesignGenerator({
+  user,
+  onApply,
+}: {
   user: SafeUser | null;
   onApply?: (result: { gradient: string; colors: Record<string, string> }) => void;
 }) {
@@ -25,9 +28,12 @@ export function AIDesignGenerator({ user, onApply }: {
   // Check Nano availability on mount
   useState(() => {
     if (typeof window !== "undefined" && "ai" in window) {
-      (window as any).ai?.languageModel?.capabilities?.().then((caps: any) => {
-        setNanoAvailable(caps?.available === "readily" || caps?.available === "after-download");
-      }).catch(() => setNanoAvailable(false));
+      (window as any).ai?.languageModel
+        ?.capabilities?.()
+        .then((caps: any) => {
+          setNanoAvailable(caps?.available === "readily" || caps?.available === "after-download");
+        })
+        .catch(() => setNanoAvailable(false));
     } else {
       setNanoAvailable(false);
     }
@@ -41,7 +47,7 @@ export function AIDesignGenerator({ user, onApply }: {
       try {
         setNanoLoading(true);
         const session = await (window as any).ai.languageModel.create({
-          systemPrompt: `You are a wedding invitation design expert. Generate ONLY valid JSON (no markdown, no backticks): {"gradient":"CSS linear-gradient","colors":{"primary":"#hex","secondary":"#hex","bg":"#hex","accent":"#hex","text":"#hex","card":"#hex"},"suggestions":["s1","s2","s3"]}`
+          systemPrompt: `You are a wedding invitation design expert. Generate ONLY valid JSON (no markdown, no backticks): {"gradient":"CSS linear-gradient","colors":{"primary":"#hex","secondary":"#hex","bg":"#hex","accent":"#hex","text":"#hex","card":"#hex"},"suggestions":["s1","s2","s3"]}`,
         });
         const raw = await session.prompt(`Design a ${style} wedding invitation: ${prompt}`);
         session.destroy();
@@ -76,31 +82,33 @@ export function AIDesignGenerator({ user, onApply }: {
       <div className="flex items-center justify-between">
         <div>
           <h3 className="font-display text-xl font-bold">AI Design Generator</h3>
-          <p className="text-xs opacity-40 mt-0.5">
-            {nanoAvailable ? "✨ Gemini Nano available — free generations!" : "Server-powered — 1 credit per generation"}
+          <p className="mt-0.5 text-xs opacity-40">
+            {nanoAvailable
+              ? "✨ Gemini Nano available — free generations!"
+              : "Server-powered — 1 credit per generation"}
           </p>
         </div>
-        <div className="credit-badge">
-          ✦ {credits} credits
-        </div>
+        <div className="credit-badge">✦ {credits} credits</div>
       </div>
 
       {/* Style selector */}
       <div>
-        <label className="block text-[10px] font-semibold tracking-[2px] uppercase text-cream-800/40 mb-3">Design Style</label>
+        <label className="mb-3 block text-[10px] font-semibold uppercase tracking-[2px] text-cream-800/40">
+          Design Style
+        </label>
         <div className="grid grid-cols-3 gap-2">
           {STYLES.map((s) => (
             <button
               key={s.id}
               onClick={() => setStyle(s.id)}
-              className={`p-3 rounded-xl text-center transition-all border ${
+              className={`rounded-xl border p-3 text-center transition-all ${
                 style === s.id
-                  ? "bg-gold-700 text-white border-gold-700 shadow-gold"
-                  : "bg-cream-50/60 border-gold-200/15 hover:border-gold-400/40"
+                  ? "border-gold-700 bg-gold-700 text-white shadow-gold"
+                  : "border-gold-200/15 bg-cream-50/60 hover:border-gold-400/40"
               }`}
             >
-              <span className="text-lg block mb-1">{s.emoji}</span>
-              <span className="text-[10px] font-semibold block">{s.label}</span>
+              <span className="mb-1 block text-lg">{s.emoji}</span>
+              <span className="block text-[10px] font-semibold">{s.label}</span>
             </button>
           ))}
         </div>
@@ -108,7 +116,7 @@ export function AIDesignGenerator({ user, onApply }: {
 
       {/* Prompt */}
       <div>
-        <label className="block text-[10px] font-semibold tracking-[2px] uppercase text-cream-800/40 mb-2">
+        <label className="mb-2 block text-[10px] font-semibold uppercase tracking-[2px] text-cream-800/40">
           Describe Your Dream Design
         </label>
         <textarea
@@ -122,45 +130,53 @@ export function AIDesignGenerator({ user, onApply }: {
       {/* Generate button */}
       <button
         onClick={handleGenerate}
-        disabled={!prompt.trim() || generate.isPending || nanoLoading || (!nanoAvailable && credits < 1)}
-        className="btn-gold w-full !py-3.5 disabled:opacity-30 disabled:cursor-not-allowed"
+        disabled={
+          !prompt.trim() || generate.isPending || nanoLoading || (!nanoAvailable && credits < 1)
+        }
+        className="btn-gold w-full !py-3.5 disabled:cursor-not-allowed disabled:opacity-30"
       >
         {generate.isPending || nanoLoading ? (
           <span className="flex items-center gap-2">
-            <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
             Generating...
           </span>
         ) : (
           <span>
             ✨ Generate Design
-            {!nanoAvailable && <span className="opacity-60 ml-1">(1 credit)</span>}
-            {nanoAvailable && <span className="opacity-60 ml-1">(free with Nano)</span>}
+            {!nanoAvailable && <span className="ml-1 opacity-60">(1 credit)</span>}
+            {nanoAvailable && <span className="ml-1 opacity-60">(free with Nano)</span>}
           </span>
         )}
       </button>
 
       {!nanoAvailable && credits < 1 && (
-        <p className="text-xs text-center text-red-500/70">
-          Not enough credits. <a href="/account" className="underline font-semibold">Buy more credits →</a>
+        <p className="text-center text-xs text-red-500/70">
+          Not enough credits.{" "}
+          <a href="/account" className="font-semibold underline">
+            Buy more credits →
+          </a>
         </p>
       )}
 
       {/* Result */}
       {result && (
-        <div className="space-y-4 animate-fade-up">
+        <div className="animate-fade-up space-y-4">
           <div className="flex items-center justify-between">
-            <h4 className="font-semibold text-sm">Generated Design</h4>
-            <span className="text-[10px] px-2 py-1 rounded-full bg-cream-200/60 opacity-50">
+            <h4 className="text-sm font-semibold">Generated Design</h4>
+            <span className="rounded-full bg-cream-200/60 px-2 py-1 text-[10px] opacity-50">
               via {result.model === "gemini-nano" ? "Gemini Nano (free)" : "Server (1 credit)"}
             </span>
           </div>
 
           {/* Preview gradient */}
-          <div className="h-40 rounded-2xl overflow-hidden relative" style={{ background: result.gradient }}>
-            <div className="absolute inset-0 flex items-center justify-center text-white text-center">
+          <div
+            className="relative h-40 overflow-hidden rounded-2xl"
+            style={{ background: result.gradient }}
+          >
+            <div className="absolute inset-0 flex items-center justify-center text-center text-white">
               <div>
                 <p className="font-script text-3xl drop-shadow">Preview</p>
-                <p className="text-[10px] tracking-[3px] uppercase opacity-60 mt-1">Your design</p>
+                <p className="mt-1 text-[10px] uppercase tracking-[3px] opacity-60">Your design</p>
               </div>
             </div>
           </div>
@@ -168,12 +184,17 @@ export function AIDesignGenerator({ user, onApply }: {
           {/* Color palette */}
           {result.colors && (
             <div>
-              <label className="block text-[10px] font-semibold tracking-[2px] uppercase text-cream-800/40 mb-2">Color Palette</label>
+              <label className="mb-2 block text-[10px] font-semibold uppercase tracking-[2px] text-cream-800/40">
+                Color Palette
+              </label>
               <div className="flex gap-2">
                 {Object.entries(result.colors).map(([k, v]) => (
                   <div key={k} className="text-center">
-                    <div className="w-10 h-10 rounded-lg shadow-sm border border-white/50" style={{ background: v as string }} />
-                    <span className="text-[8px] opacity-25 mt-0.5 block capitalize">{k}</span>
+                    <div
+                      className="h-10 w-10 rounded-lg border border-white/50 shadow-sm"
+                      style={{ background: v as string }}
+                    />
+                    <span className="mt-0.5 block text-[8px] capitalize opacity-25">{k}</span>
                   </div>
                 ))}
               </div>
@@ -183,11 +204,13 @@ export function AIDesignGenerator({ user, onApply }: {
           {/* Suggestions */}
           {result.suggestions && (
             <div>
-              <label className="block text-[10px] font-semibold tracking-[2px] uppercase text-cream-800/40 mb-2">AI Suggestions</label>
+              <label className="mb-2 block text-[10px] font-semibold uppercase tracking-[2px] text-cream-800/40">
+                AI Suggestions
+              </label>
               <div className="space-y-1.5">
                 {result.suggestions.map((s: string, i: number) => (
                   <div key={i} className="flex items-start gap-2 text-xs opacity-55">
-                    <span className="text-gold-500 mt-0.5">✦</span>
+                    <span className="mt-0.5 text-gold-500">✦</span>
                     <span>{s}</span>
                   </div>
                 ))}
@@ -208,7 +231,7 @@ export function AIDesignGenerator({ user, onApply }: {
       )}
 
       {generate.isError && (
-        <p className="text-xs text-center text-red-500/70">Generation failed. Please try again.</p>
+        <p className="text-center text-xs text-red-500/70">Generation failed. Please try again.</p>
       )}
     </div>
   );

@@ -1,8 +1,14 @@
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 
-interface DailyView { date: string; views: number }
+interface DailyView {
+  date: string;
+  views: number;
+}
 
-export function AnalyticsChart({ daily, summary }: {
+export function AnalyticsChart({
+  daily,
+  summary,
+}: {
   daily: DailyView[];
   summary: Record<string, number>;
 }) {
@@ -18,20 +24,25 @@ export function AnalyticsChart({ daily, summary }: {
   return (
     <div className="space-y-6">
       {/* Stats Grid */}
-      <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
+      <div className="grid grid-cols-3 gap-3 md:grid-cols-6">
         {stats.map((s) => (
-          <div key={s.label} className="bg-white rounded-xl p-4 text-center border border-gold-200/12">
-            <span className="text-xl block mb-1">{s.icon}</span>
+          <div
+            key={s.label}
+            className="border-gold-200/12 rounded-xl border bg-white p-4 text-center"
+          >
+            <span className="mb-1 block text-xl">{s.icon}</span>
             <p className={`font-display text-2xl font-bold ${s.color}`}>{s.value}</p>
-            <p className="text-[9px] font-semibold tracking-[1px] uppercase opacity-30 mt-0.5">{s.label}</p>
+            <p className="mt-0.5 text-[9px] font-semibold uppercase tracking-[1px] opacity-30">
+              {s.label}
+            </p>
           </div>
         ))}
       </div>
 
       {/* Chart */}
       {daily.length > 0 && (
-        <div className="bg-white rounded-2xl border border-gold-200/12 p-6">
-          <h4 className="font-display text-lg font-semibold mb-4">Daily Views (14 days)</h4>
+        <div className="border-gold-200/12 rounded-2xl border bg-white p-6">
+          <h4 className="mb-4 font-display text-lg font-semibold">Daily Views (14 days)</h4>
           <ResponsiveContainer width="100%" height={220}>
             <AreaChart data={daily}>
               <defs>
@@ -40,13 +51,35 @@ export function AnalyticsChart({ daily, summary }: {
                   <stop offset="95%" stopColor="#D4A853" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <XAxis dataKey="date" tick={{ fontSize: 10, fill: "#A08A5C" }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 10, fill: "#A08A5C" }} axisLine={false} tickLine={false} width={30} />
+              <XAxis
+                dataKey="date"
+                tick={{ fontSize: 10, fill: "#A08A5C" }}
+                axisLine={false}
+                tickLine={false}
+              />
+              <YAxis
+                tick={{ fontSize: 10, fill: "#A08A5C" }}
+                axisLine={false}
+                tickLine={false}
+                width={30}
+              />
               <Tooltip
-                contentStyle={{ background: "#FFFDF5", border: "1px solid #FFF0C2", borderRadius: 12, fontSize: 12, fontFamily: "Poppins" }}
+                contentStyle={{
+                  background: "#FFFDF5",
+                  border: "1px solid #FFF0C2",
+                  borderRadius: 12,
+                  fontSize: 12,
+                  fontFamily: "Poppins",
+                }}
                 labelStyle={{ fontWeight: 600 }}
               />
-              <Area type="monotone" dataKey="views" stroke="#D4A853" strokeWidth={2} fill="url(#viewsGrad)" />
+              <Area
+                type="monotone"
+                dataKey="views"
+                stroke="#D4A853"
+                strokeWidth={2}
+                fill="url(#viewsGrad)"
+              />
             </AreaChart>
           </ResponsiveContainer>
         </div>
