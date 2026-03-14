@@ -1,6 +1,34 @@
 import { db } from "./drizzle";
-import { users, templates, templatePurchases, payments, invitations } from "./schema";
+import { users, templates, templatePurchases, payments, invitations, plans as plansTable } from "./schema";
 import { eq, and } from "drizzle-orm";
+
+// ━━━ PLAN CACHE (60s TTL) ━━━
+let planCache: { data: (typeof plansTable.$inferSelect)[]; timestamp: number } | null = null;
+const PLAN_CACHE_TTL = 60_000;
+
+export async function getPlansFromDB() {
+  if (planCache && Date.now() - planCache.timestamp < PLAN_CACHE_TTL) {
+    return planCache.data;
+  }
+  const data = await db.select().from(plansTable).orderBy(plansTable.sortOrder);
+  planCache = { data, timestamp: Date.now() };
+  return data;
+}
+
+export function invalidatePlanCache() {
+  planCache = null;
+}
+
+export async function getPlanLimits(planId: string) {
+  const allPlans = await getPlansFromDB();
+  const plan = allPlans.find((p) => p.id === planId);
+  if (!plan) return { maxPublished: 1, maxEvents: 2, maxPhotos: 3 };
+  return {
+    maxPublished: plan.maxPublished === 0 ? Infinity : plan.maxPublished,
+    maxEvents: plan.maxEvents === 0 ? Infinity : plan.maxEvents,
+    maxPhotos: plan.maxPhotos === 0 ? Infinity : plan.maxPhotos,
+  };
+}
 
 // ━━━ CHECK IF USER OWNS TEMPLATE ━━━
 export async function userOwnsTemplate(userId: string, templateId: string): Promise<boolean> {
@@ -89,145 +117,55 @@ export async function upgradePlan(
   paymentId: string,
   status: "pending" | "completed" = "completed"
 ) {
-  const planPrices = { starter: 2999, premium: 3999, royal: 6999 };
-  const planCredits = { starter: 5, premium: 15, royal: 50 };
+  const allPlans = await getPlansFromDB();
+  const planData = allPlans.find((p) => p.id === plan);
+  if (!planData) throw new Error("Plan not found");
 
   await db.insert(payments).values({
     userId,
     type: "subscription",
-    amount: String(planPrices[plan]),
+    amount: String(planData.price),
     currency: "INR",
     status,
     razorpayPaymentId: paymentId,
     metadata: { plan },
   });
 
-  // Only grant access once payment is confirmed
   if (status === "completed") {
-    const [user] = await db
-      .select({ credits: users.credits })
-      .from(users)
-      .where(eq(users.id, userId));
-    const newCredits = (user?.credits || 0) + planCredits[plan];
-    await db
-      .update(users)
-      .set({
-        plan,
-        showAds: false,
-        credits: newCredits,
-        updatedAt: new Date(),
-      })
-      .where(eq(users.id, userId));
+    const [user] = await db.select({ credits: users.credits }).from(users).where(eq(users.id, userId));
+    const newCredits = (user?.credits || 0) + planData.credits;
+    await db.update(users).set({ plan, showAds: false, credits: newCredits, updatedAt: new Date() }).where(eq(users.id, userId));
   }
 
-  return { plan, bonusCredits: planCredits[plan] };
+  return { plan, bonusCredits: planData.credits };
 }
-
-// ━━━ PLAN LIMITS ━━━
-export const PLAN_LIMITS = {
-  free: { maxPublished: 1, maxEvents: 2, maxPhotos: 3 },
-  starter: { maxPublished: 3, maxEvents: 5, maxPhotos: 8 },
-  premium: { maxPublished: 10, maxEvents: Infinity, maxPhotos: 20 },
-  royal: { maxPublished: Infinity, maxEvents: Infinity, maxPhotos: 50 },
-} as const;
-
-export type PlanId = keyof typeof PLAN_LIMITS;
 
 // ━━━ CHECK PUBLISH LIMIT ━━━
 export async function canPublish(userId: string): Promise<{ allowed: boolean; current: number; max: number }> {
   const [user] = await db.select({ plan: users.plan }).from(users).where(eq(users.id, userId));
   if (!user) return { allowed: false, current: 0, max: 0 };
 
-  const plan = user.plan as PlanId;
-  const max = PLAN_LIMITS[plan].maxPublished;
-
+  const limits = await getPlanLimits(user.plan);
+  const max = limits.maxPublished;
   if (max === Infinity) return { allowed: true, current: 0, max };
 
-  const published = await db
-    .select({ id: invitations.id })
-    .from(invitations)
+  const published = await db.select({ id: invitations.id }).from(invitations)
     .where(and(eq(invitations.userId, userId), eq(invitations.published, true)));
 
   return { allowed: published.length < max, current: published.length, max };
 }
 
-// ━━━ PRICING PLANS ━━━
-export const PLANS = [
-  {
-    id: "free",
-    name: "Free",
-    price: 0,
-    showAds: true,
-    credits: 3,
-    maxPublished: PLAN_LIMITS.free.maxPublished,
-    features: [
-      "2 Free Templates",
-      `${PLAN_LIMITS.free.maxPublished} Published Invitation`,
-      "Up to 2 Events",
-      "Basic Photo Gallery",
-      "RSVP via WhatsApp",
-      "Invitara Branding",
-      "Ads Shown",
-      "3 AI Credits",
-    ],
-  },
-  {
-    id: "starter",
-    name: "Starter",
-    price: 2999,
-    showAds: false,
-    credits: 5,
-    maxPublished: PLAN_LIMITS.starter.maxPublished,
-    features: [
-      "Purchase Templates Individually",
-      `Up to ${PLAN_LIMITS.starter.maxPublished} Published Invitations`,
-      "Up to 5 Events",
-      "Photo Gallery (8 photos)",
-      "RSVP Dashboard",
-      "No Ads",
-      "Remove Branding",
-      "5 Bonus AI Credits",
-    ],
-  },
-  {
-    id: "premium",
-    name: "Premium",
-    price: 3999,
-    showAds: false,
-    credits: 15,
-    badge: "Most Popular",
-    maxPublished: PLAN_LIMITS.premium.maxPublished,
-    features: [
-      "ALL Templates Included",
-      `Up to ${PLAN_LIMITS.premium.maxPublished} Published Invitations`,
-      "Unlimited Events",
-      "Photo Gallery (20 photos)",
-      "RSVP Dashboard + Analytics",
-      "No Ads",
-      "Custom Domain",
-      "Background Music",
-      "15 Bonus AI Credits",
-      "Priority Support",
-    ],
-  },
-  {
-    id: "royal",
-    name: "Royal",
-    price: 6999,
-    showAds: false,
-    credits: 50,
-    maxPublished: Infinity,
-    features: [
-      "Everything in Premium",
-      "Unlimited Published Invitations",
-      "Custom Design Tweaks",
-      "Video Background",
-      "Multi-language Support",
-      "Guest Management CRM",
-      "QR Code Invites",
-      "50 Bonus AI Credits",
-      "Concierge Setup",
-      "Dedicated Manager",
-    ],
-  },
-] as const;
+// ━━━ GET PLANS FOR DISPLAY ━━━
+export async function getPlans() {
+  const allPlans = await getPlansFromDB();
+  return allPlans.filter((p) => p.active).map((p) => ({
+    id: p.id,
+    name: p.name,
+    price: p.price,
+    showAds: p.showAds,
+    credits: p.credits,
+    maxPublished: p.maxPublished === 0 ? Infinity : p.maxPublished,
+    badge: p.badge,
+    features: p.features,
+  }));
+}

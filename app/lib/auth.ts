@@ -85,7 +85,10 @@ export async function validateSession(token: string) {
 
   const [user] = await db.select().from(users).where(eq(users.id, session.userId)).limit(1);
 
-  return user || null;
+  if (!user) return null;
+  if (user.banned) return null;
+
+  return user;
 }
 
 export async function invalidateSession(token: string) {
@@ -198,6 +201,8 @@ export async function loginUser(data: z.infer<typeof loginSchema>) {
 
   const valid = await verifyPassword(data.password, user.passwordHash);
   if (!valid) throw new Error("Invalid credentials");
+
+  if (user.banned) throw new Error("Account suspended. Contact support.");
 
   return user;
 }
