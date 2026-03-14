@@ -255,8 +255,8 @@ export async function getRetentionCohorts(data: { weeks: number }) {
         floor(extract(epoch FROM (date_trunc('week', ${analyticsEvents.createdAt}) - c.cohort_week)) / 604800)::int AS week_number,
         count(DISTINCT c.id) AS active_users
       FROM cohorts c
-      INNER JOIN ${analyticsEvents} ae ON ae.${sql.raw("user_id")} = c.id
-      WHERE ae.${sql.raw("created_at")} >= c.cohort_week
+      INNER JOIN ${analyticsEvents} ON ${analyticsEvents.userId} = c.id
+      WHERE ${analyticsEvents.createdAt} >= c.cohort_week
       GROUP BY c.cohort_week, week_number
     ),
     cohort_sizes AS (
