@@ -10,6 +10,7 @@ import {
   sessionQueryOptions,
   invitationQueryOptions,
   eventsQueryOptions,
+  adQueryOptions,
   useSaveInvitation,
   useAddEvent,
   useRemoveEvent,
@@ -23,8 +24,31 @@ import { TemplateSwitcher } from "~/components/VirtualTemplateGrid";
 import { AIDesignGenerator } from "~/components/AIDesignGenerator";
 import { ShareModal } from "~/components/ShareModal";
 import { AdBanner } from "~/components/AdBanner";
+import {
+  Users,
+  Calendar,
+  FileText,
+  Palette,
+  Sparkles,
+  Image,
+  Loader2,
+  Check,
+  Eye,
+  Send,
+  ArrowLeft,
+  RotateCcw,
+} from "lucide-react";
 
 const TABS = ["couple", "events", "details", "style", "ai", "media"] as const;
+
+const TAB_ICONS: Record<string, React.ReactNode> = {
+  couple: <Users className="h-3.5 w-3.5" />,
+  events: <Calendar className="h-3.5 w-3.5" />,
+  details: <FileText className="h-3.5 w-3.5" />,
+  style: <Palette className="h-3.5 w-3.5" />,
+  ai: <Sparkles className="h-3.5 w-3.5" />,
+  media: <Image className="h-3.5 w-3.5" />,
+};
 
 export function EditorInner() {
   const searchParams = useSearchParams();
@@ -34,14 +58,13 @@ export function EditorInner() {
 
   const { data: allTemplates = [] } = useQuery(templatesQueryOptions());
   const { data: user } = useQuery(sessionQueryOptions());
+  const { data: editorAd } = useQuery(adQueryOptions("editor_bottom"));
 
-  // Load existing invitation when ?invitation= param is present
   const { data: existingInv, isLoading: invLoading } = useQuery({
     ...invitationQueryOptions(invitationIdParam ?? ""),
     enabled: !!invitationIdParam,
   });
 
-  // Editor store — single source of truth for all mutable UI state
   const [editorStore] = useState(() =>
     createEditorStore(
       invitationIdParam
@@ -50,7 +73,6 @@ export function EditorInner() {
     )
   );
 
-  // Granular reactive subscriptions — only the subscribing component re-renders on slice change
   const tab = useStore(editorStore, (s) => s.tab);
   const inv = useStore(editorStore, (s) => s.inv);
   const invitationId = useStore(editorStore, (s) => s.invitationId);
@@ -61,7 +83,6 @@ export function EditorInner() {
   const saveStatus = useStore(editorStore, (s) => s.saveStatus);
   const showShare = useStore(editorStore, (s) => s.showShare);
 
-  // Load DB events scoped to the invitation
   const { data: dbEvents = [] } = useQuery({
     ...eventsQueryOptions(invitationId ?? ""),
     enabled: !!invitationId,
@@ -72,7 +93,6 @@ export function EditorInner() {
   const removeEvent = useRemoveEvent();
   const publish = usePublishInvitation();
 
-  // Warn before browser close/navigate if there are unsaved changes
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (saveStatus === "saving") {
@@ -83,7 +103,6 @@ export function EditorInner() {
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [saveStatus]);
 
-  // Seed store when existing invitation loads
   useEffect(() => {
     if (existingInv) {
       editorStore.setState((s) => ({
@@ -131,7 +150,6 @@ export function EditorInner() {
       },
     };
 
-  // Merge AI overrides into template for the live preview
   const activeTmpl = aiOverrides
     ? {
         ...baseTmpl,
@@ -140,10 +158,8 @@ export function EditorInner() {
       }
     : baseTmpl;
 
-  // Events shown in preview: DB events if invitation exists, else locally buffered
   const displayEvents = invitationId ? dbEvents : localEvents;
 
-  // Media save: photos and musicUrl saved directly (no debounce needed)
   const handleMediaSave = async (updates: { photos?: string[]; musicUrl?: string }) => {
     const current = editorStore.state.inv;
     const merged = { ...current, ...updates };
@@ -163,7 +179,6 @@ export function EditorInner() {
     }
   };
 
-  // Auto-save: called by debounced form submit
   const handleSave = async (patch: Partial<InvData>) => {
     const current = editorStore.state.inv;
     const merged = { ...current, ...patch };
@@ -187,7 +202,6 @@ export function EditorInner() {
         }));
         router.replace(`/editor?invitation=${result.id}`);
 
-        // Flush buffered local events to DB
         for (const ev of editorStore.state.localEvents) {
           await addEvent.mutateAsync({
             invitationId: result.id,
@@ -286,32 +300,31 @@ export function EditorInner() {
 
   const [mobilePreviewOpen, setMobilePreviewOpen] = useState(false);
 
-  // Loading state while fetching existing invitation
   if (invLoading && invitationIdParam) {
     return (
       <div className="flex min-h-screen items-center justify-center pt-[68px]">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-gold-300 border-t-gold-700" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
   return (
     <>
-      {/* ── MOBILE PREVIEW SHEET ── */}
+      {/* Mobile preview sheet */}
       {mobilePreviewOpen && (
-        <div className="fixed inset-0 z-[100] flex flex-col bg-white pt-[68px] lg:hidden">
-          <div className="flex items-center justify-between border-b border-gold-200/15 px-4 py-2">
-            <span className="text-[10px] font-semibold uppercase tracking-[2px] text-gold-600">
+        <div className="fixed inset-0 z-[100] flex flex-col bg-background pt-[68px] lg:hidden">
+          <div className="flex items-center justify-between border-b border-border px-4 py-2">
+            <span className="text-[10px] font-semibold uppercase tracking-[2px] text-primary">
               Preview
             </span>
             <button
               onClick={() => setMobilePreviewOpen(false)}
-              className="rounded-full bg-cream-100 px-4 py-1.5 text-[10px] font-semibold"
+              className="flex items-center gap-1.5 rounded-full bg-accent px-4 py-1.5 text-[10px] font-semibold"
             >
-              ← Back to Edit
+              <ArrowLeft className="h-3 w-3" /> Back to Edit
             </button>
           </div>
-          <div className="flex-1 overflow-y-auto bg-cream-50/30">
+          <div className="flex-1 overflow-y-auto bg-accent/30">
             <InvitationPreview
               invitation={inv}
               events={displayEvents as any}
@@ -323,43 +336,44 @@ export function EditorInner() {
       )}
 
       <div className="grid min-h-screen grid-cols-1 pt-[68px] lg:grid-cols-[380px_1fr]">
-        {/* ── SIDEBAR ── */}
-        <div className="border-gold-200/12 overflow-y-auto border-r bg-white pb-24 lg:pb-20">
+        {/* Sidebar */}
+        <div className="overflow-y-auto border-r border-border bg-card pb-24 lg:pb-20">
           {/* Tab bar */}
-          <div className="border-gold-200/12 sticky top-0 z-10 flex border-b bg-white">
+          <div className="sticky top-0 z-10 flex border-b border-border bg-card">
             {TABS.map((t) => (
               <button
                 key={t}
                 onClick={() => editorStore.setState((s) => ({ ...s, tab: t }))}
-                className={`flex-1 border-b-2 py-3.5 text-[9px] font-semibold uppercase tracking-[1.5px] transition-colors ${
+                className={`flex flex-1 flex-col items-center gap-0.5 border-b-2 py-3 text-[9px] font-semibold uppercase tracking-[1px] transition-colors ${
                   tab === t
-                    ? "border-gold-500 text-gold-700"
-                    : "border-transparent text-gold-800/50 hover:text-gold-800/80"
+                    ? "border-primary text-primary"
+                    : "border-transparent text-muted-foreground hover:text-foreground"
                 }`}
               >
-                {t === "ai" ? "✨ AI" : t === "media" ? "📸 Media" : t}
+                {TAB_ICONS[t]}
+                {t}
               </button>
             ))}
           </div>
 
           {/* Save status bar */}
-          <div className="border-gold-200/8 flex h-7 items-center border-b bg-cream-50/30 px-5">
+          <div className="flex h-7 items-center border-b border-border/50 bg-accent/30 px-5">
             {saveStatus === "saving" && (
-              <span className="flex items-center gap-1.5 text-[10px] text-gold-600/70">
-                <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-gold-400" />
-                Saving…
+              <span className="flex items-center gap-1.5 text-[10px] text-primary/70">
+                <Loader2 className="h-3 w-3 animate-spin" />
+                Saving...
               </span>
             )}
             {saveStatus === "saved" && (
-              <span className="flex items-center gap-1.5 text-[10px] text-emerald-600/80">
-                <span>✓</span> Saved
+              <span className="flex items-center gap-1.5 text-[10px] text-emerald-600">
+                <Check className="h-3 w-3" /> Saved
               </span>
             )}
             {saveStatus === "idle" && invitationId && (
-            <span className="text-[10px] text-gold-700/60">All changes saved</span>
+              <span className="text-[10px] text-muted-foreground">All changes saved</span>
             )}
             {saveStatus === "idle" && !invitationId && (
-              <span className="text-[10px] text-gold-700/60">
+              <span className="text-[10px] text-muted-foreground">
                 Enter couple names to start saving
               </span>
             )}
@@ -379,7 +393,7 @@ export function EditorInner() {
             {tab === "style" && (
               <div className="space-y-6">
                 <div>
-                  <p className="mb-3 text-[10px] font-semibold uppercase tracking-[2px] text-gold-700 dark:text-gold-400">
+                  <p className="mb-3 text-[10px] font-semibold uppercase tracking-[2px] text-muted-foreground">
                     Choose Template
                   </p>
                   <TemplateSwitcher
@@ -389,31 +403,33 @@ export function EditorInner() {
                   />
                 </div>
                 <div>
-                  <p className="mb-3 text-[10px] font-semibold uppercase tracking-[2px] text-gold-700 dark:text-gold-400">
+                  <p className="mb-3 text-[10px] font-semibold uppercase tracking-[2px] text-muted-foreground">
                     Active
                   </p>
-                  <div className="rounded-xl border border-gold-200/15 bg-cream-50/60 p-4">
+                  <div className="rounded-xl border border-border bg-accent/50 p-4">
                     <div className="mb-2 flex items-center gap-2.5">
                       <span className="text-xl">{baseTmpl.emoji}</span>
                       <h3 className="font-display text-lg font-semibold">{baseTmpl.name}</h3>
                     </div>
-                    <p className="text-xs opacity-45">{baseTmpl.description}</p>
+                    <p className="text-xs text-muted-foreground">{baseTmpl.description}</p>
                   </div>
                 </div>
                 <div>
                   <div className="mb-3 flex items-center justify-between">
-                    <p className="text-[10px] font-semibold uppercase tracking-[2px] text-gold-700 dark:text-gold-400">
+                    <p className="text-[10px] font-semibold uppercase tracking-[2px] text-muted-foreground">
                       Colors{" "}
                       {aiOverrides && (
-                        <span className="ml-1 normal-case text-gold-600">✨ AI Applied</span>
+                        <span className="ml-1 inline-flex items-center gap-1 normal-case text-primary">
+                          <Sparkles className="h-3 w-3" /> AI Applied
+                        </span>
                       )}
                     </p>
                     {aiOverrides && (
                       <button
                         onClick={() => editorStore.setState((s) => ({ ...s, aiOverrides: null }))}
-                        className="text-[9px] text-red-400/70 underline hover:text-red-500"
+                        className="flex items-center gap-1 text-[9px] text-destructive/70 underline hover:text-destructive"
                       >
-                        Reset
+                        <RotateCcw className="h-3 w-3" /> Reset
                       </button>
                     )}
                   </div>
@@ -421,10 +437,10 @@ export function EditorInner() {
                     {Object.entries(activeTmpl.colors || {}).map(([k, v]) => (
                       <div key={k} className="text-center">
                         <div
-                          className="h-10 w-10 rounded-lg border border-white/50 shadow-sm"
+                          className="h-10 w-10 rounded-lg border border-border shadow-sm"
                           style={{ background: v as string }}
                         />
-                        <span className="mt-0.5 block text-[8px] capitalize opacity-25">{k}</span>
+                        <span className="mt-0.5 block text-[8px] capitalize text-muted-foreground/50">{k}</span>
                       </div>
                     ))}
                   </div>
@@ -449,29 +465,17 @@ export function EditorInner() {
               />
             )}
 
-            {/* Ad banner for free users (not on AI/media tab) */}
+            {/* Ad */}
             {(!user || user.showAds) && tab !== "ai" && tab !== "media" && (
               <div className="mt-6">
-                <AdBanner
-                  user={user ?? null}
-                  slot="editor_bottom"
-                  ad={{
-                    id: "ai-cta",
-                    title: "AI-Powered Designs",
-                    description: "Let AI generate unique palettes and suggestions.",
-                    ctaText: "Try AI Tab →",
-                    ctaLink: "/editor",
-                    gradient: "linear-gradient(135deg,#4A3A6B,#7A6AAB,#D4A853)",
-                    icon: "✨",
-                  }}
-                />
+                <AdBanner user={user ?? null} slot="editor_bottom" ad={editorAd ?? null} />
               </div>
             )}
           </div>
         </div>
 
-        {/* ── PREVIEW ── */}
-        <div className="hidden items-start justify-center overflow-y-auto bg-cream-200/40 px-6 py-10 lg:flex">
+        {/* Preview */}
+        <div className="hidden items-start justify-center overflow-y-auto bg-accent/30 px-6 py-10 lg:flex">
           <div className="phone-frame">
             <div className="relative z-20 mx-auto h-[26px] w-[100px] rounded-b-2xl bg-[#1a1a1a]" />
             <div
@@ -488,33 +492,32 @@ export function EditorInner() {
         </div>
       </div>
 
-      {/* ── PUBLISH BAR ── */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 flex items-center gap-3 border-t border-gold-200/15 bg-white/90 px-6 py-3 backdrop-blur-md">
-        <span className="mr-auto hidden text-xs opacity-30 sm:block">
+      {/* Publish bar */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 flex items-center gap-3 border-t border-border bg-card/90 px-6 py-3 backdrop-blur-md">
+        <span className="mr-auto hidden text-xs text-muted-foreground sm:block">
           {inv.groomName && inv.brideName ? (
             <>
               Editing:{" "}
-              <span className="font-semibold">
+              <span className="font-semibold text-foreground">
                 {inv.groomName} & {inv.brideName}
               </span>
             </>
           ) : (
-            <span>New Invitation — fill in couple names to begin saving</span>
+            <span>New Invitation -- fill in couple names to begin saving</span>
           )}
         </span>
-        {/* Mobile preview toggle */}
         <button
           className="btn-gold-outline !px-5 !py-2.5 !text-[10px] lg:hidden"
           onClick={() => setMobilePreviewOpen(true)}
         >
-          Preview
+          <Eye className="h-3.5 w-3.5" /> Preview
         </button>
         {invitationId && (
           <Link
             href={`/preview?invitation=${invitationId}`}
             className="btn-gold-outline !hidden !px-5 !py-2.5 !text-[10px] lg:!inline-flex"
           >
-            Preview
+            <Eye className="h-3.5 w-3.5" /> Preview
           </Link>
         )}
         <button
@@ -522,7 +525,11 @@ export function EditorInner() {
           disabled={publish.isPending || saveInv.isPending}
           onClick={handlePublish}
         >
-          {publish.isPending ? "Publishing…" : "✦ Publish & Share"}
+          {publish.isPending ? (
+            <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Publishing...</>
+          ) : (
+            <><Send className="h-3.5 w-3.5" /> Publish & Share</>
+          )}
         </button>
       </div>
 

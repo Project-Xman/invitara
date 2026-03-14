@@ -15,11 +15,11 @@ export default function WhimsicalTemplate({
 
   return (
     <div
-      className={fullWidth ? "mx-auto max-w-lg" : ""}
+      className={fullWidth ? "w-full" : ""}
       style={{ background: tc.bg, fontFamily: "'Dancing Script', cursive" }}
     >
       {/* Hero - Pastel gradient with floating blobs */}
-      <div className="relative flex min-h-[500px] items-center justify-center overflow-hidden">
+      <div className="relative flex min-h-screen items-center justify-center overflow-hidden">
         <div className="absolute inset-0" style={{ background: t.gradient }} />
         {/* Floating blob shapes */}
         <div
@@ -70,21 +70,21 @@ export default function WhimsicalTemplate({
           💐
         </div>
         {/* Content */}
-        <div className="relative z-10 px-6 py-20 text-center text-white">
-          <p className="mb-3 font-sans text-[10px] font-medium uppercase tracking-[5px] opacity-60">
+        <div className="relative z-10 mx-auto max-w-4xl px-6 py-20 text-center text-white">
+          <p className="mb-3 font-sans text-[10px] font-medium uppercase tracking-[5px] opacity-60 md:text-xs">
             Together Forever
           </p>
           <div className="mb-4 text-4xl">✨</div>
-          <h1 className="text-[58px] leading-none drop-shadow-lg">{inv.groomName}</h1>
+          <h1 className="text-[48px] leading-none drop-shadow-lg md:text-[72px] lg:text-[96px]">{inv.groomName}</h1>
           <div className="my-2 flex items-center justify-center gap-4">
-            <span className="h-px w-12 bg-white/25" />
+            <span className="h-px w-12 bg-white/25 md:w-24" />
             <span className="text-2xl opacity-70">💕</span>
-            <span className="h-px w-12 bg-white/25" />
+            <span className="h-px w-12 bg-white/25 md:w-24" />
           </div>
-          <h1 className="text-[58px] leading-none drop-shadow-lg">{inv.brideName}</h1>
+          <h1 className="text-[48px] leading-none drop-shadow-lg md:text-[72px] lg:text-[96px]">{inv.brideName}</h1>
           <div className="mt-8">
-            <p className="font-sans text-xs uppercase tracking-[3px] opacity-50">{dateStr}</p>
-            <p className="mt-1 font-sans text-[10px] uppercase tracking-[2px] opacity-35">
+            <p className="font-sans text-xs uppercase tracking-[3px] opacity-50 md:text-sm">{dateStr}</p>
+            <p className="mt-1 font-sans text-[10px] uppercase tracking-[2px] opacity-35 md:text-xs">
               {inv.venue || ""}
             </p>
           </div>
@@ -95,7 +95,7 @@ export default function WhimsicalTemplate({
       {inv.message && (
         <SectionReveal>
           <div
-            className="relative overflow-hidden px-8 py-14 text-center"
+            className="relative overflow-hidden px-6 py-14 text-center md:px-12 md:py-20 lg:px-16 lg:py-28"
             style={{ background: tc.bg }}
           >
             {/* Small blob decoration */}
@@ -103,19 +103,21 @@ export default function WhimsicalTemplate({
               className="absolute right-4 top-4 h-16 w-16 animate-blob-morph rounded-full opacity-10"
               style={{ background: tc.primary }}
             />
-            <p
-              className="mb-5 font-sans text-[10px] font-semibold uppercase tracking-[5px]"
-              style={{ color: tc.secondary }}
-            >
-              Our Love Story
-            </p>
-            <p
-              className="mx-auto max-w-sm font-body text-base italic leading-[2] opacity-55"
-              style={{ color: tc.text }}
-            >
-              {inv.message}
-            </p>
-            <div className="mt-4 text-2xl">🦋</div>
+            <div className="mx-auto max-w-3xl">
+              <p
+                className="mb-5 font-sans text-[10px] font-semibold uppercase tracking-[5px] md:text-xs"
+                style={{ color: tc.secondary }}
+              >
+                Our Love Story
+              </p>
+              <p
+                className="mx-auto max-w-xl font-body text-base italic leading-[2] opacity-55 md:text-lg"
+                style={{ color: tc.text }}
+              >
+                {inv.message}
+              </p>
+              <div className="mt-4 text-2xl">🦋</div>
+            </div>
           </div>
         </SectionReveal>
       )}
@@ -125,8 +127,9 @@ export default function WhimsicalTemplate({
 
       {/* Blessings */}
       <SectionReveal>
-        <div className="px-6 py-14 text-center" style={{ background: tc.card }}>
-          <p className="mb-3 text-xl" style={{ color: tc.secondary }}>
+        <div className="px-6 py-14 text-center md:px-12 md:py-20 lg:px-16 lg:py-28" style={{ background: tc.card }}>
+          <div className="mx-auto max-w-3xl">
+          <p className="mb-3 text-xl md:text-2xl" style={{ color: tc.secondary }}>
             {inv.mantra ||
               "\u0950 \u0936\u094D\u0930\u0940 \u0917\u0923\u0947\u0936\u093E\u092F \u0928\u092E\u0903"}
           </p>
@@ -150,35 +153,36 @@ export default function WhimsicalTemplate({
           <p className="font-sans text-sm opacity-45" style={{ color: tc.text }}>
             You to celebrate the union of
           </p>
-          <p className="mt-3 text-3xl" style={{ color: tc.primary }}>
+          <p className="mt-3 text-3xl md:text-4xl" style={{ color: tc.primary }}>
             {inv.groomName} & {inv.brideName}
           </p>
           {inv.groomFamily && (
-            <p className="mt-4 font-sans text-xs opacity-40" style={{ color: tc.text }}>
+            <p className="mt-4 font-sans text-xs opacity-40 md:text-sm" style={{ color: tc.text }}>
               Son of {inv.groomFamily}
             </p>
           )}
           {inv.brideFamily && (
-            <p className="mt-1 font-sans text-xs opacity-40" style={{ color: tc.text }}>
+            <p className="mt-1 font-sans text-xs opacity-40 md:text-sm" style={{ color: tc.text }}>
               Daughter of {inv.brideFamily}
             </p>
           )}
+          </div>
         </div>
       </SectionReveal>
 
       <DashedDivider color={tc.secondary} />
 
       {/* Events */}
-      <div className="px-5 py-12" style={{ background: tc.bg }}>
+      <div className="px-6 py-14 md:px-12 md:py-20 lg:px-16 lg:py-28" style={{ background: tc.bg }}>
         <SectionReveal>
-          <h2 className="mb-1 text-center text-2xl" style={{ color: tc.primary }}>
+          <h2 className="mb-1 text-center text-2xl md:text-3xl lg:text-4xl" style={{ color: tc.primary }}>
             Celebrations
           </h2>
-          <p className="mb-8 text-center font-sans text-sm opacity-40" style={{ color: tc.text }}>
+          <p className="mb-8 text-center font-sans text-sm opacity-40 md:text-base" style={{ color: tc.text }}>
             Magical moments await
           </p>
         </SectionReveal>
-        <div className="space-y-3">
+        <div className="mx-auto max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
           {events.map((ev, i) => (
             <SectionReveal
               key={ev.id}
@@ -240,15 +244,15 @@ export default function WhimsicalTemplate({
 
       {/* Gallery */}
       <SectionReveal>
-        <div className="relative overflow-hidden px-5 py-12" style={{ background: tc.card }}>
+        <div className="relative overflow-hidden px-6 py-14 md:px-12 md:py-20 lg:px-16 lg:py-28" style={{ background: tc.card }}>
           <div
             className="opacity-8 absolute bottom-4 left-4 h-20 w-20 animate-blob-morph rounded-full"
             style={{ background: tc.primary + "20" }}
           />
-          <h2 className="mb-6 text-center text-xl" style={{ color: tc.primary }}>
+          <h2 className="mb-6 text-center text-xl md:text-3xl lg:text-4xl" style={{ color: tc.primary }}>
             Our Moments
           </h2>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="mx-auto max-w-4xl grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
             {["\uD83D\uDCF8", "\uD83D\uDC95", "\u2728", "\uD83C\uDF05"].map((e, i) => (
               <SectionReveal key={i} animation="scaleIn" delay={i * 80}>
                 <div
@@ -270,8 +274,9 @@ export default function WhimsicalTemplate({
 
       {/* Things to Know */}
       <SectionReveal>
-        <div className="px-6 py-12" style={{ background: tc.bg }}>
-          <h2 className="mb-6 text-center text-xl" style={{ color: tc.primary }}>
+        <div className="px-6 py-14 md:px-12 md:py-20 lg:px-16 lg:py-28" style={{ background: tc.bg }}>
+          <div className="mx-auto max-w-3xl">
+          <h2 className="mb-6 text-center text-xl md:text-3xl lg:text-4xl" style={{ color: tc.primary }}>
             Things to Know
           </h2>
           {[
@@ -296,6 +301,7 @@ export default function WhimsicalTemplate({
               </div>
             </div>
           ))}
+          </div>
         </div>
       </SectionReveal>
 
@@ -314,10 +320,10 @@ export default function WhimsicalTemplate({
           >
             🌷
           </div>
-          <h2 className="mb-6 text-xl" style={{ color: tc.primary }}>
+          <h2 className="mb-6 text-xl md:text-3xl lg:text-4xl" style={{ color: tc.primary }}>
             Counting the Days
           </h2>
-          <div className="flex justify-center gap-3">
+          <div className="flex justify-center gap-3 md:gap-5 lg:gap-6">
             {[
               { v: cd.d, l: "Days" },
               { v: cd.h, l: "Hours" },
@@ -326,7 +332,7 @@ export default function WhimsicalTemplate({
             ].map((u, i) => (
               <div key={i} className="text-center">
                 <div
-                  className="flex h-16 w-16 items-center justify-center rounded-full text-2xl font-bold"
+                  className="flex h-16 w-16 items-center justify-center rounded-full text-2xl font-bold md:h-20 md:w-20 md:text-3xl lg:h-24 lg:w-24 lg:text-4xl"
                   style={{
                     background: `linear-gradient(135deg, ${tc.primary}12, ${tc.accent}40)`,
                     color: tc.primary,
@@ -351,22 +357,24 @@ export default function WhimsicalTemplate({
 
       {/* RSVP */}
       <SectionReveal>
-        <div className="px-6 py-12 text-center" style={{ background: tc.bg }}>
-          <div className="mb-3 text-4xl">💌</div>
-          <h2 className="mb-2 text-xl" style={{ color: tc.primary }}>
-            RSVP
-          </h2>
-          <p className="mb-6 font-sans text-xs opacity-40" style={{ color: tc.text }}>
-            We'd love to hear from you
-          </p>
-          <button
-            className="w-full rounded-full py-3.5 font-sans text-sm font-semibold uppercase tracking-[2px] text-white"
-            style={{
-              background: `linear-gradient(135deg, ${tc.primary}, ${tc.secondary})`,
-            }}
-          >
-            \uD83D\uDCAC RSVP on WhatsApp
-          </button>
+        <div className="px-6 py-14 text-center md:px-12 md:py-20 lg:px-16 lg:py-28" style={{ background: tc.bg }}>
+          <div className="mx-auto max-w-xl">
+            <div className="mb-3 text-4xl">💌</div>
+            <h2 className="mb-2 text-xl md:text-3xl" style={{ color: tc.primary }}>
+              RSVP
+            </h2>
+            <p className="mb-6 font-sans text-xs opacity-40 md:text-sm" style={{ color: tc.text }}>
+              We'd love to hear from you
+            </p>
+            <button
+              className="w-full rounded-full py-3.5 font-sans text-sm font-semibold uppercase tracking-[2px] text-white md:py-4 md:text-base"
+              style={{
+                background: `linear-gradient(135deg, ${tc.primary}, ${tc.secondary})`,
+              }}
+            >
+              \uD83D\uDCAC RSVP on WhatsApp
+            </button>
+          </div>
         </div>
       </SectionReveal>
 
@@ -384,7 +392,7 @@ export default function WhimsicalTemplate({
         >
           💐
         </div>
-        <div className="mb-2 text-3xl" style={{ color: tc.primary }}>
+        <div className="mb-2 text-3xl md:text-4xl" style={{ color: tc.primary }}>
           {inv.groomName} & {inv.brideName}
         </div>
         <p className="font-sans text-xs opacity-35" style={{ color: tc.text }}>

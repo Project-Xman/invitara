@@ -22,11 +22,11 @@ export default function LaavanTemplate({
 
   return (
     <div
-      className={fullWidth ? "mx-auto max-w-lg" : ""}
+      className={fullWidth ? "w-full" : ""}
       style={{ background: tc.bg, fontFamily: "'Cormorant Garamond', serif" }}
     >
       {/* Hero - Saffron gradient with arch frame */}
-      <div className="relative flex min-h-[480px] items-center justify-center overflow-hidden">
+      <div className="relative flex min-h-screen items-center justify-center overflow-hidden">
         <div className="absolute inset-0" style={{ background: t.gradient }} />
         <div
           className="absolute inset-0"
@@ -55,20 +55,20 @@ export default function LaavanTemplate({
           }}
         />
         {/* Content */}
-        <div className="relative z-10 px-8 py-20 text-center text-white">
+        <div className="relative z-10 mx-auto max-w-4xl px-8 py-20 text-center text-white">
           <p className="mb-2 text-lg" style={{ color: "#FFFFFF90" }}>
             &#x0A74;
           </p>
-          <p className="mb-6 font-sans text-[9px] font-medium uppercase tracking-[6px] opacity-50">
+          <p className="mb-6 font-sans text-[9px] font-medium uppercase tracking-[6px] opacity-50 md:text-xs">
             Satguru Prasaad
           </p>
-          <h1 className="font-script text-[52px] leading-none drop-shadow-lg">{inv.groomName}</h1>
+          <h1 className="font-script text-[48px] leading-none drop-shadow-lg md:text-[72px] lg:text-[96px]">{inv.groomName}</h1>
           <div className="my-3 flex items-center justify-center gap-4">
-            <span className="h-px w-12 bg-white/25" />
-            <span className="font-display text-sm uppercase tracking-[6px] opacity-70">Weds</span>
-            <span className="h-px w-12 bg-white/25" />
+            <span className="h-px w-12 bg-white/25 md:w-24" />
+            <span className="font-display text-sm uppercase tracking-[6px] opacity-70 md:text-base">Weds</span>
+            <span className="h-px w-12 bg-white/25 md:w-24" />
           </div>
-          <h1 className="font-script text-[52px] leading-none drop-shadow-lg">{inv.brideName}</h1>
+          <h1 className="font-script text-[48px] leading-none drop-shadow-lg md:text-[72px] lg:text-[96px]">{inv.brideName}</h1>
           <div className="mt-8 border-t border-white/15 pt-5">
             <p className="font-sans text-xs uppercase tracking-[3px] opacity-50">{dateStr}</p>
             <p className="mt-1 font-sans text-[10px] uppercase tracking-[2px] opacity-30">
@@ -83,8 +83,9 @@ export default function LaavanTemplate({
 
       {/* Blessings - Ardaas style */}
       <SectionReveal>
-        <div className="px-6 py-14 text-center" style={{ background: tc.card }}>
-          <p className="mb-3 text-xl" style={{ color: tc.secondary }}>
+        <div className="px-6 py-14 text-center md:px-12 md:py-20 lg:px-16 lg:py-28" style={{ background: tc.card }}>
+          <div className="mx-auto max-w-3xl">
+          <p className="mb-3 text-xl md:text-2xl" style={{ color: tc.secondary }}>
             {inv.mantra || "Ik Onkaar Satguru Prasaad"}
           </p>
           <div className="mb-4 text-3xl">🙏</div>
@@ -107,38 +108,39 @@ export default function LaavanTemplate({
           <p className="font-sans text-sm opacity-45" style={{ color: tc.text }}>
             To the Anand Karaj ceremony of
           </p>
-          <p className="mt-3 font-display text-2xl font-bold" style={{ color: tc.primary }}>
+          <p className="mt-3 font-display text-2xl font-bold md:text-3xl" style={{ color: tc.primary }}>
             {inv.groomName} <span className="opacity-30">&</span> {inv.brideName}
           </p>
           {inv.groomFamily && (
-            <p className="mt-4 font-sans text-xs opacity-40" style={{ color: tc.text }}>
+            <p className="mt-4 font-sans text-xs opacity-40 md:text-sm" style={{ color: tc.text }}>
               Son of {inv.groomFamily}
             </p>
           )}
           {inv.brideFamily && (
-            <p className="mt-1 font-sans text-xs opacity-40" style={{ color: tc.text }}>
+            <p className="mt-1 font-sans text-xs opacity-40 md:text-sm" style={{ color: tc.text }}>
               Daughter of {inv.brideFamily}
             </p>
           )}
+          </div>
         </div>
       </SectionReveal>
 
       <ScallopedDivider color={tc.secondary} bgColor={tc.bg} />
 
       {/* Four Laavan Section - Unique feature */}
-      <div className="px-6 py-14" style={{ background: tc.bg }}>
+      <div className="px-6 py-14 md:px-12 md:py-20 lg:px-16 lg:py-28" style={{ background: tc.bg }}>
         <SectionReveal>
           <h2
-            className="mb-2 text-center font-display text-2xl font-bold"
+            className="mb-2 text-center font-display text-2xl font-bold md:text-3xl lg:text-4xl"
             style={{ color: tc.primary }}
           >
             The Four Laavan
           </h2>
-          <p className="mb-10 text-center font-sans text-sm opacity-40" style={{ color: tc.text }}>
+          <p className="mb-10 text-center font-sans text-sm opacity-40 md:text-base" style={{ color: tc.text }}>
             Four rounds of the sacred Guru Granth Sahib
           </p>
         </SectionReveal>
-        <div className="relative">
+        <div className="relative mx-auto max-w-3xl">
           {/* Connecting gold line */}
           <div
             className="absolute bottom-6 left-6 top-6 w-px"
@@ -181,19 +183,19 @@ export default function LaavanTemplate({
       <ScallopedDivider color={tc.secondary} bgColor={tc.card} />
 
       {/* Events */}
-      <div className="px-5 py-12" style={{ background: tc.card }}>
+      <div className="px-6 py-14 md:px-12 md:py-20 lg:px-16 lg:py-28" style={{ background: tc.card }}>
         <SectionReveal>
           <h2
-            className="mb-1 text-center font-display text-2xl font-bold"
+            className="mb-1 text-center font-display text-2xl font-bold md:text-3xl lg:text-4xl"
             style={{ color: tc.primary }}
           >
             Celebrations
           </h2>
-          <p className="mb-8 text-center font-sans text-sm opacity-40" style={{ color: tc.text }}>
+          <p className="mb-8 text-center font-sans text-sm opacity-40 md:text-base" style={{ color: tc.text }}>
             Join us in these joyous moments
           </p>
         </SectionReveal>
-        <div className="space-y-3">
+        <div className="mx-auto max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
           {events.map((ev, i) => (
             <SectionReveal key={ev.id} animation="fadeUp" delay={i * 100}>
               <div
@@ -243,19 +245,21 @@ export default function LaavanTemplate({
       {/* Message */}
       {inv.message && (
         <SectionReveal>
-          <div className="px-8 py-14 text-center" style={{ background: tc.bg }}>
-            <p
-              className="mb-4 font-sans text-[10px] font-semibold uppercase tracking-[4px]"
-              style={{ color: tc.secondary }}
-            >
-              A Message from the Couple
-            </p>
-            <p
-              className="mx-auto max-w-sm text-base italic leading-[2] opacity-50"
-              style={{ color: tc.text }}
-            >
-              {inv.message}
-            </p>
+          <div className="px-6 py-14 text-center md:px-12 md:py-20 lg:px-16 lg:py-28" style={{ background: tc.bg }}>
+            <div className="mx-auto max-w-3xl">
+              <p
+                className="mb-4 font-sans text-[10px] font-semibold uppercase tracking-[4px] md:text-xs"
+                style={{ color: tc.secondary }}
+              >
+                A Message from the Couple
+              </p>
+              <p
+                className="mx-auto max-w-xl text-base italic leading-[2] opacity-50 md:text-lg"
+                style={{ color: tc.text }}
+              >
+                {inv.message}
+              </p>
+            </div>
           </div>
         </SectionReveal>
       )}
@@ -264,14 +268,14 @@ export default function LaavanTemplate({
 
       {/* Gallery */}
       <SectionReveal>
-        <div className="px-5 py-12" style={{ background: tc.card }}>
+        <div className="px-6 py-14 md:px-12 md:py-20 lg:px-16 lg:py-28" style={{ background: tc.card }}>
           <h2
-            className="mb-6 text-center font-display text-xl font-bold"
+            className="mb-6 text-center font-display text-xl font-bold md:text-3xl lg:text-4xl"
             style={{ color: tc.primary }}
           >
             Our Moments
           </h2>
-          <div className="grid grid-cols-2 gap-2.5">
+          <div className="mx-auto max-w-4xl grid grid-cols-2 md:grid-cols-4 gap-2.5 md:gap-4">
             {["\uD83D\uDCF8", "\uD83D\uDC95", "\u2728", "\uD83C\uDF05"].map((e, i) => (
               <div
                 key={i}
@@ -287,9 +291,10 @@ export default function LaavanTemplate({
 
       {/* Things to Know */}
       <SectionReveal>
-        <div className="px-5 py-12" style={{ background: tc.bg }}>
+        <div className="px-6 py-14 md:px-12 md:py-20 lg:px-16 lg:py-28" style={{ background: tc.bg }}>
+          <div className="mx-auto max-w-3xl">
           <h2
-            className="mb-6 text-center font-display text-xl font-bold"
+            className="mb-6 text-center font-display text-xl font-bold md:text-3xl lg:text-4xl"
             style={{ color: tc.primary }}
           >
             Things to Know
@@ -316,32 +321,35 @@ export default function LaavanTemplate({
               </div>
             </div>
           ))}
+          </div>
         </div>
       </SectionReveal>
 
       {/* RSVP */}
       <SectionReveal>
-        <div className="px-6 py-12 text-center" style={{ background: tc.card }}>
-          <div className="mb-3 text-4xl">💌</div>
-          <h2 className="mb-2 font-display text-xl font-bold" style={{ color: tc.primary }}>
-            RSVP
-          </h2>
-          <button
-            className="w-full rounded-full py-3.5 font-sans text-sm font-semibold uppercase tracking-[2px] text-white shadow-gold"
-            style={{ background: tc.primary }}
-          >
-            \uD83D\uDCAC RSVP on WhatsApp
-          </button>
+        <div className="px-6 py-14 text-center md:px-12 md:py-20 lg:px-16 lg:py-28" style={{ background: tc.card }}>
+          <div className="mx-auto max-w-xl">
+            <div className="mb-3 text-4xl">💌</div>
+            <h2 className="mb-2 font-display text-xl font-bold md:text-3xl" style={{ color: tc.primary }}>
+              RSVP
+            </h2>
+            <button
+              className="w-full rounded-full py-3.5 font-sans text-sm font-semibold uppercase tracking-[2px] text-white shadow-gold md:py-4 md:text-base"
+              style={{ background: tc.primary }}
+            >
+              \uD83D\uDCAC RSVP on WhatsApp
+            </button>
+          </div>
         </div>
       </SectionReveal>
 
       {/* Countdown */}
       <SectionReveal>
-        <div className="px-6 py-12 text-center" style={{ background: tc.bg }}>
-          <h2 className="mb-6 font-display text-xl font-bold" style={{ color: tc.primary }}>
+        <div className="px-6 py-14 text-center md:px-12 md:py-20 lg:px-16 lg:py-28" style={{ background: tc.bg }}>
+          <h2 className="mb-6 font-display text-xl font-bold md:text-3xl lg:text-4xl" style={{ color: tc.primary }}>
             The Countdown Begins
           </h2>
-          <div className="flex justify-center gap-3">
+          <div className="flex justify-center gap-3 md:gap-5 lg:gap-6">
             {[
               { v: cd.d, l: "Days" },
               { v: cd.h, l: "Hours" },
@@ -350,7 +358,7 @@ export default function LaavanTemplate({
             ].map((u, i) => (
               <div key={i} className="text-center">
                 <div
-                  className="flex h-16 w-16 items-center justify-center rounded-full font-display text-2xl font-bold"
+                  className="flex h-16 w-16 items-center justify-center rounded-full font-display text-2xl font-bold md:h-20 md:w-20 md:text-3xl lg:h-24 lg:w-24 lg:text-4xl"
                   style={{
                     background: tc.primary + "0A",
                     color: tc.primary,
@@ -384,7 +392,7 @@ export default function LaavanTemplate({
         />
         <div className="relative z-10">
           <p className="mb-2 text-xl text-white opacity-60">&#x0A74;</p>
-          <div className="mb-2 font-script text-3xl text-white drop-shadow-lg">
+          <div className="mb-2 font-script text-3xl text-white drop-shadow-lg md:text-4xl">
             {inv.groomName} & {inv.brideName}
           </div>
           <p className="text-xs text-white opacity-30">

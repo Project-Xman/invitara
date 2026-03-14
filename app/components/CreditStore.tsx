@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Coins, TrendingUp, TrendingDown, Loader2, Sparkles } from "lucide-react";
 import type { SafeUser } from "~/lib/auth";
 import { useCreateOrder, useBuyCredits } from "~/lib/queries";
 import { openRazorpayCheckout } from "~/lib/razorpay";
@@ -69,15 +70,17 @@ export function CreditStore({
   return (
     <div className="space-y-8">
       {/* Balance */}
-      <div className="rounded-2xl bg-gradient-to-br from-gold-700 to-gold-900 p-8 text-center text-white">
-        <p className="mb-2 text-[10px] uppercase tracking-[3px] opacity-50">Your Balance</p>
+      <div className="rounded-2xl bg-gradient-to-br from-primary to-primary/70 p-8 text-center text-primary-foreground">
+        <p className="mb-2 text-[10px] uppercase tracking-[3px] opacity-60">Your Balance</p>
         <p className="font-display text-6xl font-bold">{user.credits}</p>
-        <p className="mt-1 text-sm opacity-60">AI Generation Credits</p>
+        <p className="mt-1 flex items-center justify-center gap-1.5 text-sm opacity-70">
+          <Coins className="h-3.5 w-3.5" /> AI Generation Credits
+        </p>
       </div>
 
       {/* Error */}
       {error && (
-        <div className="rounded-xl border border-red-200/40 bg-red-50 p-4 text-sm text-red-600">
+        <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
           {error}
           <button onClick={() => setError(null)} className="ml-3 text-xs underline">
             Dismiss
@@ -98,27 +101,27 @@ export function CreditStore({
                 disabled={isLoading || buyingId !== null}
                 className={`relative rounded-2xl border p-5 text-center transition-all ${
                   pkg.popular
-                    ? "border-gold-500 bg-white shadow-gold"
-                    : "border-gold-200/15 bg-cream-50/60 hover:border-gold-400/40"
+                    ? "border-primary bg-card shadow-gold"
+                    : "border-border bg-card hover:border-primary/40"
                 } disabled:cursor-not-allowed disabled:opacity-60`}
               >
                 {pkg.popular && (
-                  <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 rounded-full bg-gold-700 px-3 py-0.5 text-[9px] font-semibold uppercase tracking-[1px] text-white">
+                  <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-0.5 text-[9px] font-semibold uppercase tracking-[1px] text-primary-foreground">
                     Best Value
                   </span>
                 )}
                 {isLoading ? (
                   <div className="flex flex-col items-center gap-2 py-2">
-                    <div className="h-6 w-6 animate-spin rounded-full border-2 border-gold-300 border-t-gold-700" />
-                    <p className="text-xs opacity-50">Processing…</p>
+                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                    <p className="text-xs text-muted-foreground">Processing...</p>
                   </div>
                 ) : (
                   <>
-                    <p className="font-display text-3xl font-bold text-gold-700">{pkg.credits}</p>
-                    <p className="mt-0.5 text-xs opacity-40">credits</p>
-                    <p className="mt-3 text-sm font-semibold">₹{pkg.priceInr}</p>
-                    <p className="text-[10px] opacity-30">
-                      ₹{(pkg.priceInr / pkg.credits).toFixed(0)}/credit
+                    <p className="font-display text-3xl font-bold text-primary">{pkg.credits}</p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">credits</p>
+                    <p className="mt-3 text-sm font-semibold">{'\u20B9'}{pkg.priceInr}</p>
+                    <p className="text-[10px] text-muted-foreground/50">
+                      {'\u20B9'}{(pkg.priceInr / pkg.credits).toFixed(0)}/credit
                     </p>
                   </>
                 )}
@@ -132,22 +135,31 @@ export function CreditStore({
       {history.length > 0 && (
         <div>
           <h3 className="mb-4 font-display text-xl font-bold">Transaction History</h3>
-          <div className="overflow-hidden rounded-2xl border border-gold-200/15 bg-white">
+          <div className="overflow-hidden rounded-2xl border border-border bg-card">
             {history.map((tx) => (
               <div
                 key={tx.id}
-                className="border-gold-200/8 flex items-center justify-between border-b px-5 py-3.5 last:border-0"
+                className="flex items-center justify-between border-b border-border/50 px-5 py-3.5 last:border-0"
               >
-                <div>
-                  <p className="text-sm">{tx.reason}</p>
-                  <p className="mt-0.5 text-[11px] opacity-30">
-                    {new Date(tx.createdAt).toLocaleDateString("en-IN", {
-                      month: "short",
-                      day: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </p>
+                <div className="flex items-center gap-3">
+                  <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${tx.amount > 0 ? "bg-emerald-100 dark:bg-emerald-900/30" : "bg-red-100 dark:bg-red-900/30"}`}>
+                    {tx.amount > 0 ? (
+                      <TrendingUp className="h-4 w-4 text-emerald-600" />
+                    ) : (
+                      <TrendingDown className="h-4 w-4 text-red-500" />
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-sm">{tx.reason}</p>
+                    <p className="mt-0.5 text-[11px] text-muted-foreground/50">
+                      {new Date(tx.createdAt).toLocaleDateString("en-IN", {
+                        month: "short",
+                        day: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </p>
+                  </div>
                 </div>
                 <div className="text-right">
                   <p
@@ -156,7 +168,7 @@ export function CreditStore({
                     {tx.amount > 0 ? "+" : ""}
                     {tx.amount}
                   </p>
-                  <p className="text-[10px] opacity-25">bal: {tx.balance}</p>
+                  <p className="text-[10px] text-muted-foreground/40">bal: {tx.balance}</p>
                 </div>
               </div>
             ))}

@@ -229,7 +229,7 @@ export const adQueryOptions = (slot: string) =>
 
 // ━━━ PLANS ━━━
 export const plansQueryOptions = () =>
-  queryOptions({ queryKey: ["plans"], queryFn: () => actions.getPlans(), staleTime: Infinity });
+  queryOptions({ queryKey: ["plans"], queryFn: () => actions.getPlans(), staleTime: 60_000 });
 
 // ━━━ PUBLIC INVITE ━━━
 export const publicInviteQueryOptions = (slug: string) =>

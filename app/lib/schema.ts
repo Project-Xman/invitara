@@ -61,6 +61,7 @@ export const users = pgTable(
     resetPasswordToken: varchar("reset_password_token", { length: 255 }),
     resetPasswordExpiresAt: timestamp("reset_password_expires_at"),
     showAds: boolean("show_ads").notNull().default(true),
+    banned: boolean("banned").notNull().default(false),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").notNull().defaultNow(),
   },
@@ -128,6 +129,44 @@ export const templatePurchases = pgTable(
   },
   (t) => [uniqueIndex("user_template_idx").on(t.userId, t.templateId)]
 );
+
+// ━━━ PLANS ━━━
+export const plans = pgTable("plans", {
+  id: varchar("id", { length: 50 }).primaryKey(),
+  name: varchar("name", { length: 100 }).notNull(),
+  price: integer("price").notNull().default(0),
+  showAds: boolean("show_ads").notNull().default(false),
+  credits: integer("credits").notNull().default(0),
+  maxPublished: integer("max_published").notNull().default(1),
+  maxEvents: integer("max_events").notNull().default(2),
+  maxPhotos: integer("max_photos").notNull().default(3),
+  badge: varchar("badge", { length: 100 }),
+  features: jsonb("features").$type<string[]>().notNull().default([]),
+  sortOrder: integer("sort_order").notNull().default(0),
+  active: boolean("active").notNull().default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// ━━━ ADS ━━━
+export const ads = pgTable("ads", {
+  id: varchar("id", { length: 100 }).primaryKey(),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description").notNull(),
+  ctaText: varchar("cta_text", { length: 100 }).notNull(),
+  ctaLink: text("cta_link").notNull(),
+  gradient: text("gradient").notNull(),
+  icon: varchar("icon", { length: 50 }).notNull().default(""),
+  slot: varchar("slot", { length: 50 }).notNull(),
+  priority: integer("priority").notNull().default(0),
+  active: boolean("active").notNull().default(true),
+  impressions: integer("impressions").notNull().default(0),
+  clicks: integer("clicks").notNull().default(0),
+  startDate: timestamp("start_date"),
+  endDate: timestamp("end_date"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
 
 // ━━━ INVITATIONS ━━━
 export const invitations = pgTable(
@@ -294,6 +333,7 @@ export const analyticsEvents = pgTable(
     index("analytics_invitation_idx").on(t.invitationId),
     index("analytics_event_idx").on(t.event),
     index("analytics_created_idx").on(t.createdAt),
+    index("analytics_user_created_idx").on(t.userId, t.createdAt),
   ]
 );
 
@@ -308,6 +348,23 @@ export const adImpressions = pgTable("ad_impressions", {
   revenue: decimal("revenue", { precision: 10, scale: 4 }).default("0"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
+
+// ━━━ ADMIN AUDIT LOG ━━━
+export const adminAuditLog = pgTable(
+  "admin_audit_log",
+  {
+    id: serial("id").primaryKey(),
+    adminId: uuid("admin_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    action: varchar("action", { length: 100 }).notNull(),
+    targetType: varchar("target_type", { length: 50 }).notNull(),
+    targetId: varchar("target_id", { length: 255 }).notNull(),
+    details: jsonb("details").$type<Record<string, unknown>>().default({}),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (t) => [index("audit_admin_idx").on(t.adminId), index("audit_created_idx").on(t.createdAt)]
+);
 
 // ━━━ CREDIT PACKAGES (purchasable) ━━━
 export const creditPackages = pgTable("credit_packages", {

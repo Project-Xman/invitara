@@ -5,41 +5,128 @@
 @tailwind utilities;
 
 @layer base {
-  :root {
-    /* shadcn/ui CSS variables — themed to gold/cream palette */
-    --background: oklch(0.99 0.005 85); /* warm cream #FFFEFB */
-    --foreground: oklch(0.22 0.04 60); /* deep warm brown #3a2a10 */
-    --card: oklch(1 0 0);
-    --card-foreground: oklch(0.22 0.04 60);
-    --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.22 0.04 60);
-    --primary: oklch(0.68 0.14 75); /* golden yellow #D4A853 */
-    --primary-foreground: oklch(0.15 0.04 60); /* dark warm brown for contrast */
-    --secondary: oklch(0.96 0.015 80); /* warm cream-200 */
-    --secondary-foreground: oklch(0.28 0.05 65); /* warm brown */
-    --muted: oklch(0.96 0.008 80);
-    --muted-foreground: oklch(0.50 0.06 65); /* readable warm brown */
-    --accent: oklch(0.95 0.01 80);
-    --accent-foreground: oklch(0.25 0.05 65);
-    --destructive: oklch(0.577 0.245 27.325);
-    --destructive-foreground: oklch(0.97 0.005 85);
-    --border: oklch(0.88 0.03 75); /* warm gold-200 */
-    --input: oklch(0.94 0.02 75); /* light warm input bg */
-    --ring: oklch(0.68 0.14 75); /* golden yellow ring */
+  /* ═══════════════════════════════════════════════
+     THEME ENGINE — 3 golden hues x 2 modes
+     Variables store raw oklch parameters (L C H)
+     so Tailwind can inject alpha: oklch(var(--x) / <a>)
+     ═══════════════════════════════════════════════ */
+
+  /* ── LIGHT MODE (Silver-White base) ── */
+  :root,
+  .theme-yellow {
+    --background: 0.97 0.004 90;
+    --foreground: 0.18 0.02 75;
+    --card: 1 0 0;
+    --card-foreground: 0.18 0.02 75;
+    --popover: 1 0 0;
+    --popover-foreground: 0.18 0.02 75;
+    --primary: 0.68 0.14 75;
+    --primary-foreground: 0.12 0.02 75;
+    --secondary: 0.94 0.008 90;
+    --secondary-foreground: 0.30 0.03 75;
+    --muted: 0.94 0.006 90;
+    --muted-foreground: 0.46 0.03 75;
+    --accent: 0.93 0.01 85;
+    --accent-foreground: 0.25 0.03 75;
+    --destructive: 0.577 0.245 27.325;
+    --destructive-foreground: 0.97 0.005 85;
+    --border: 0.88 0.015 85;
+    --input: 0.94 0.01 85;
+    --ring: 0.68 0.14 75;
     --radius: 0.875rem;
-    --chart-1: oklch(0.72 0.15 75);
-    --chart-2: oklch(0.65 0.12 80);
-    --chart-3: oklch(0.58 0.10 70);
-    --chart-4: oklch(0.50 0.08 65);
-    --chart-5: oklch(0.42 0.06 60);
-    --sidebar: oklch(0.99 0.005 85); /* warm cream sidebar */
-    --sidebar-foreground: oklch(0.22 0.04 60); /* warm brown */
-    --sidebar-primary: oklch(0.68 0.14 75); /* golden primary */
-    --sidebar-primary-foreground: oklch(0.15 0.04 60);
-    --sidebar-accent: oklch(0.95 0.01 80);
-    --sidebar-accent-foreground: oklch(0.25 0.05 65);
-    --sidebar-border: oklch(0.88 0.03 75);
-    --sidebar-ring: oklch(0.68 0.14 75);
+    --chart-1: 0.72 0.15 75;
+    --chart-2: 0.65 0.12 80;
+    --chart-3: 0.58 0.10 70;
+    --chart-4: 0.50 0.08 65;
+    --chart-5: 0.42 0.06 60;
+    --sidebar: 0.97 0.004 90;
+    --sidebar-foreground: 0.18 0.02 75;
+    --sidebar-primary: 0.68 0.14 75;
+    --sidebar-primary-foreground: 0.12 0.02 75;
+    --sidebar-accent: 0.93 0.01 85;
+    --sidebar-accent-foreground: 0.25 0.03 75;
+    --sidebar-border: 0.88 0.015 85;
+    --sidebar-ring: 0.68 0.14 75;
+  }
+
+  .theme-orange {
+    --primary: 0.70 0.16 55;
+    --primary-foreground: 0.12 0.03 55;
+    --ring: 0.70 0.16 55;
+    --accent: 0.93 0.02 55;
+    --accent-foreground: 0.28 0.05 55;
+    --sidebar-primary: 0.70 0.16 55;
+    --sidebar-primary-foreground: 0.12 0.03 55;
+    --sidebar-ring: 0.70 0.16 55;
+  }
+
+  .theme-pink {
+    --primary: 0.68 0.14 10;
+    --primary-foreground: 0.12 0.03 10;
+    --ring: 0.68 0.14 10;
+    --accent: 0.93 0.02 10;
+    --accent-foreground: 0.28 0.05 10;
+    --sidebar-primary: 0.68 0.14 10;
+    --sidebar-primary-foreground: 0.12 0.03 10;
+    --sidebar-ring: 0.68 0.14 10;
+  }
+
+  /* ── DARK MODE (Matte Black base) ── */
+  .dark,
+  .dark.theme-yellow {
+    --background: 0.13 0.01 75;
+    --foreground: 0.93 0.008 90;
+    --card: 0.18 0.012 75;
+    --card-foreground: 0.93 0.008 90;
+    --popover: 0.18 0.012 75;
+    --popover-foreground: 0.93 0.008 90;
+    --primary: 0.75 0.14 75;
+    --primary-foreground: 0.10 0.02 75;
+    --secondary: 0.22 0.012 75;
+    --secondary-foreground: 0.90 0.01 85;
+    --muted: 0.22 0.008 75;
+    --muted-foreground: 0.68 0.025 80;
+    --accent: 0.22 0.015 75;
+    --accent-foreground: 0.90 0.01 85;
+    --destructive: 0.704 0.191 22.216;
+    --border: 0.30 0.015 75;
+    --input: 0.22 0.01 75;
+    --ring: 0.75 0.14 75;
+    --chart-1: 0.75 0.14 75;
+    --chart-2: 0.65 0.13 80;
+    --chart-3: 0.58 0.11 70;
+    --chart-4: 0.50 0.09 65;
+    --chart-5: 0.42 0.07 60;
+    --sidebar: 0.15 0.01 75;
+    --sidebar-foreground: 0.90 0.01 85;
+    --sidebar-primary: 0.75 0.14 75;
+    --sidebar-primary-foreground: 0.10 0.02 75;
+    --sidebar-accent: 0.22 0.015 75;
+    --sidebar-accent-foreground: 0.90 0.01 85;
+    --sidebar-border: 0.30 0.015 75;
+    --sidebar-ring: 0.75 0.14 75;
+  }
+
+  .dark.theme-orange {
+    --primary: 0.75 0.16 55;
+    --primary-foreground: 0.10 0.03 55;
+    --ring: 0.75 0.16 55;
+    --accent: 0.22 0.02 55;
+    --accent-foreground: 0.90 0.02 55;
+    --sidebar-primary: 0.75 0.16 55;
+    --sidebar-primary-foreground: 0.10 0.03 55;
+    --sidebar-ring: 0.75 0.16 55;
+  }
+
+  .dark.theme-pink {
+    --primary: 0.75 0.14 10;
+    --primary-foreground: 0.10 0.03 10;
+    --ring: 0.75 0.14 10;
+    --accent: 0.22 0.02 10;
+    --accent-foreground: 0.90 0.02 10;
+    --sidebar-primary: 0.75 0.14 10;
+    --sidebar-primary-foreground: 0.10 0.03 10;
+    --sidebar-ring: 0.75 0.14 10;
   }
 
   * {
@@ -51,97 +138,108 @@
   html {
     scroll-behavior: smooth;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     @apply font-sans;
   }
   body {
     @apply bg-background text-foreground font-sans;
   }
   ::selection {
-    background: rgba(212, 168, 83, 0.25);
+    background: oklch(0.68 0.14 75 / 25%);
   }
   ::-webkit-scrollbar {
     width: 6px;
   }
   ::-webkit-scrollbar-track {
-    background: #fdf8f0;
+    @apply bg-background;
   }
   ::-webkit-scrollbar-thumb {
-    background: #d4c09a;
-    border-radius: 100px;
-  }
-  .dark {
-    --background: oklch(0.14 0.02 60); /* deep warm dark brown */
-    --foreground: oklch(0.95 0.02 80); /* warm cream white */
-    --card: oklch(0.20 0.025 60);
-    --card-foreground: oklch(0.95 0.02 80);
-    --popover: oklch(0.20 0.025 60);
-    --popover-foreground: oklch(0.95 0.02 80);
-    --primary: oklch(0.72 0.15 75); /* bright golden yellow for dark mode */
-    --primary-foreground: oklch(0.12 0.03 60); /* very dark brown on gold */
-    --secondary: oklch(0.27 0.03 65);
-    --secondary-foreground: oklch(0.92 0.02 80);
-    --muted: oklch(0.25 0.02 60);
-    --muted-foreground: oklch(0.72 0.04 75); /* readable golden muted text */
-    --accent: oklch(0.27 0.03 65);
-    --accent-foreground: oklch(0.92 0.02 80);
-    --destructive: oklch(0.704 0.191 22.216);
-    --border: oklch(0.68 0.12 75 / 20%); /* subtle golden border */
-    --input: oklch(0.68 0.12 75 / 12%);
-    --ring: oklch(0.72 0.15 75); /* golden ring */
-    --chart-1: oklch(0.72 0.15 75);
-    --chart-2: oklch(0.65 0.13 80);
-    --chart-3: oklch(0.58 0.11 70);
-    --chart-4: oklch(0.50 0.09 65);
-    --chart-5: oklch(0.42 0.07 60);
-    --sidebar: oklch(0.18 0.02 60);
-    --sidebar-foreground: oklch(0.92 0.02 80);
-    --sidebar-primary: oklch(0.72 0.15 75);
-    --sidebar-primary-foreground: oklch(0.12 0.03 60);
-    --sidebar-accent: oklch(0.25 0.02 60);
-    --sidebar-accent-foreground: oklch(0.92 0.02 80);
-    --sidebar-border: oklch(0.68 0.12 75 / 15%);
-    --sidebar-ring: oklch(0.72 0.15 75);
+    @apply bg-border rounded-full;
   }
 }
 
 @layer components {
-  .glass-gold {
-    background: rgba(253, 248, 240, 0.88);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid rgba(212, 168, 83, 0.1);
+  /* ── Glassmorphism nav ── */
+  .glass-nav {
+    @apply bg-background/85 backdrop-blur-xl border-b border-border/50;
   }
+  .dark .glass-nav {
+    @apply bg-background/90 border-border/30;
+  }
+
+  /* ── Golden gradient text ── */
   .text-golden {
-    background: linear-gradient(135deg, #a67c2e 0%, #d4a853 40%, #ffd466 60%, #c49a3d 100%);
+    background: linear-gradient(
+      135deg,
+      oklch(0.55 0.12 75) 0%,
+      oklch(0.68 0.14 75) 40%,
+      oklch(0.80 0.14 80) 60%,
+      oklch(0.60 0.13 75) 100%
+    );
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
+  .theme-orange .text-golden {
+    background: linear-gradient(135deg, oklch(0.55 0.14 55) 0%, oklch(0.70 0.16 55) 40%, oklch(0.80 0.14 60) 60%, oklch(0.60 0.15 55) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .theme-pink .text-golden {
+    background: linear-gradient(135deg, oklch(0.55 0.12 10) 0%, oklch(0.68 0.14 10) 40%, oklch(0.78 0.12 15) 60%, oklch(0.58 0.13 10) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ── Buttons ── */
   .btn-gold {
-    @apply inline-flex items-center justify-center gap-2 rounded-full bg-gold-700 px-8 py-3.5 text-sm font-semibold uppercase tracking-widest text-white shadow-gold transition-all duration-300 hover:-translate-y-0.5 hover:bg-gold-600 hover:shadow-gold-lg;
+    @apply inline-flex items-center justify-center gap-2 rounded-full
+           bg-primary px-8 py-3.5
+           text-sm font-semibold uppercase tracking-widest text-primary-foreground
+           shadow-md shadow-primary/15
+           transition-all duration-300
+           hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/25;
     font-family: var(--font-sans), sans-serif;
   }
   .btn-gold-outline {
-    @apply inline-flex items-center justify-center gap-2 rounded-full border-2 border-gold-500 bg-transparent px-8 py-3.5 text-sm font-semibold uppercase tracking-widest text-gold-700 transition-all duration-300 hover:border-gold-700 hover:bg-gold-700 hover:text-white;
+    @apply inline-flex items-center justify-center gap-2 rounded-full
+           border-2 border-primary bg-transparent px-8 py-3.5
+           text-sm font-semibold uppercase tracking-widest text-primary
+           transition-all duration-300
+           hover:bg-primary hover:text-primary-foreground;
     font-family: var(--font-sans), sans-serif;
   }
+
+  /* ── Inputs ── */
   .input-gold {
-    @apply w-full rounded-xl border border-gold-200/50 bg-cream-100/60 px-4 py-3 text-sm text-gold-900 transition-all duration-300 placeholder:text-gold-700/40 focus:border-gold-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-gold-200 dark:bg-gold-900/20 dark:text-gold-100 dark:placeholder:text-gold-400/50 dark:focus:bg-gold-900/30;
+    @apply w-full rounded-xl border border-border bg-input/60
+           px-4 py-3 text-sm text-foreground
+           transition-all duration-300
+           placeholder:text-muted-foreground/50
+           focus:border-primary focus:bg-background focus:outline-none focus:ring-2 focus:ring-primary/20;
     font-family: var(--font-sans), sans-serif;
   }
+
+  /* ── Cards ── */
   .card-gold {
-    @apply rounded-2xl border border-gold-200/15 bg-white transition-all duration-500 hover:-translate-y-1.5 hover:shadow-gold-lg;
+    @apply rounded-2xl border border-border bg-card
+           transition-all duration-500
+           hover:-translate-y-1.5 hover:shadow-lg hover:shadow-primary/10;
   }
+
+  /* ── Dot pattern background ── */
   .bg-dots-gold {
     background-image:
-      radial-gradient(circle at 25% 25%, rgba(212, 168, 83, 0.06) 1px, transparent 1px),
-      radial-gradient(circle at 75% 75%, rgba(196, 154, 61, 0.04) 1px, transparent 1px);
+      radial-gradient(circle at 25% 25%, oklch(0.68 0.14 75 / 6%) 1px, transparent 1px),
+      radial-gradient(circle at 75% 75%, oklch(0.60 0.13 75 / 4%) 1px, transparent 1px);
     background-size: 48px 48px;
   }
 
-  /* Ad banner styles */
+  /* ── Ad banner styles ── */
   .ad-banner {
-    @apply relative overflow-hidden rounded-2xl border border-gold-200/20 bg-gradient-to-r from-cream-100 via-cream-50 to-cream-100;
+    @apply relative overflow-hidden rounded-2xl border border-border/30 bg-card;
   }
   .ad-banner-dismiss {
     @apply absolute right-2 top-2 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-black/10 text-xs transition-all hover:bg-black/20;
@@ -150,26 +248,31 @@
     @apply absolute left-2 top-2 rounded bg-black/5 px-2 py-0.5 text-[8px] font-semibold uppercase tracking-[1.5px];
   }
 
-  /* Credit badge */
+  /* ── Credit badge ── */
   .credit-badge {
-    @apply inline-flex items-center gap-1.5 rounded-full border border-gold-200/30 bg-gold-100/80 px-3 py-1.5 text-xs font-semibold text-gold-800;
+    @apply inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary;
   }
 
-  /* Phone frame */
+  /* ── Phone frame for editor preview ── */
   .phone-frame {
     width: 375px;
     min-height: 720px;
-    background: white;
-    border-radius: 44px;
-    overflow: hidden;
+    @apply bg-card rounded-[44px] overflow-hidden;
     box-shadow:
-      0 0 0 2px #d4a853,
-      0 0 0 6px #3a2a10,
-      0 0 0 8px #d4a853,
-      0 32px 80px rgba(58, 42, 16, 0.2);
+      0 0 0 2px oklch(0.68 0.14 75),
+      0 0 0 6px oklch(0.18 0.02 75),
+      0 0 0 8px oklch(0.68 0.14 75),
+      0 32px 80px oklch(0.18 0.02 75 / 20%);
+  }
+  .dark .phone-frame {
+    box-shadow:
+      0 0 0 2px oklch(0.75 0.14 75),
+      0 0 0 6px oklch(0.10 0.01 75),
+      0 0 0 8px oklch(0.75 0.14 75),
+      0 32px 80px oklch(0 0 0 / 40%);
   }
 
-  /* ===== TEMPLATE REVEAL ANIMATIONS ===== */
+  /* ── Template reveal animations ── */
   .reveal-base {
     transition:
       opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
@@ -197,5 +300,13 @@
   .reveal-visible {
     opacity: 1;
     transform: translateY(0) translateX(0) scale(1);
+  }
+
+  /* ── Section label ── */
+  .section-label {
+    @apply text-[11px] font-semibold uppercase tracking-[3px] text-primary/70;
+  }
+  .section-heading {
+    @apply font-display text-4xl font-bold md:text-5xl;
   }
 }

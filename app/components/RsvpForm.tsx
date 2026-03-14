@@ -1,5 +1,13 @@
 import { useState } from "react";
 import { useSubmitRsvp } from "~/lib/queries";
+import {
+  PartyPopper,
+  Minus,
+  Plus,
+  Loader2,
+  Send,
+  CheckCircle2,
+} from "lucide-react";
 
 interface Event {
   id: number;
@@ -61,11 +69,13 @@ export function RsvpForm({ invitationId, events }: Props) {
 
   if (submitted) {
     return (
-      <div className="animate-fade-up rounded-2xl border border-gold-200/15 bg-white p-8 text-center shadow-card">
-        <div className="mb-4 text-5xl">🎉</div>
+      <div className="animate-fade-up rounded-2xl border border-border bg-card p-8 text-center shadow-card">
+        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
+          <CheckCircle2 className="h-8 w-8 text-primary" />
+        </div>
         <h3 className="mb-2 font-display text-2xl font-bold">RSVP Received!</h3>
-        <p className="text-sm opacity-50">
-          Thank you, <span className="font-semibold opacity-80">{name}</span>! We've noted your
+        <p className="text-sm text-muted-foreground">
+          Thank you, <span className="font-semibold text-foreground">{name}</span>! We've noted your
           response and can't wait to celebrate with you.
         </p>
       </div>
@@ -75,18 +85,18 @@ export function RsvpForm({ invitationId, events }: Props) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="animate-fade-up space-y-5 rounded-2xl border border-gold-200/15 bg-white p-8 shadow-card"
+      className="animate-fade-up space-y-5 rounded-2xl border border-border bg-card p-8 shadow-card"
     >
       {error && (
-        <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+        <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
           {error}
         </div>
       )}
 
       {/* Name */}
       <div>
-        <label htmlFor="rsvp-name" className="mb-2 block text-[10px] font-semibold uppercase tracking-[2px] text-cream-800/40">
-          Your Name <span className="text-gold-500">*</span>
+        <label htmlFor="rsvp-name" className="mb-2 block text-[10px] font-semibold uppercase tracking-[2px] text-muted-foreground">
+          Your Name <span className="text-primary">*</span>
         </label>
         <input
           id="rsvp-name"
@@ -101,7 +111,7 @@ export function RsvpForm({ invitationId, events }: Props) {
       {/* Phone + Email */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div>
-          <label htmlFor="rsvp-phone" className="mb-2 block text-[10px] font-semibold uppercase tracking-[2px] text-cream-800/40">
+          <label htmlFor="rsvp-phone" className="mb-2 block text-[10px] font-semibold uppercase tracking-[2px] text-muted-foreground">
             Phone
           </label>
           <input
@@ -113,7 +123,7 @@ export function RsvpForm({ invitationId, events }: Props) {
           />
         </div>
         <div>
-          <label htmlFor="rsvp-email" className="mb-2 block text-[10px] font-semibold uppercase tracking-[2px] text-cream-800/40">
+          <label htmlFor="rsvp-email" className="mb-2 block text-[10px] font-semibold uppercase tracking-[2px] text-muted-foreground">
             Email
           </label>
           <input
@@ -129,33 +139,33 @@ export function RsvpForm({ invitationId, events }: Props) {
 
       {/* Guest count */}
       <div>
-        <p className="mb-2 text-[10px] font-semibold uppercase tracking-[2px] text-cream-800/40">
+        <p className="mb-2 text-[10px] font-semibold uppercase tracking-[2px] text-muted-foreground">
           Number of Guests
         </p>
         <div className="flex items-center gap-3">
           <button
             type="button"
             onClick={() => setGuests((g) => Math.max(1, g - 1))}
-            className="h-10 w-10 rounded-xl border border-gold-200/30 text-lg font-bold transition-colors hover:bg-gold-50"
+            className="flex h-10 w-10 items-center justify-center rounded-xl border border-border text-lg font-bold transition-colors hover:bg-accent"
           >
-            −
+            <Minus className="h-4 w-4" />
           </button>
           <span className="w-8 text-center font-display text-2xl font-bold">{guests}</span>
           <button
             type="button"
             onClick={() => setGuests((g) => Math.min(20, g + 1))}
-            className="h-10 w-10 rounded-xl border border-gold-200/30 text-lg font-bold transition-colors hover:bg-gold-50"
+            className="flex h-10 w-10 items-center justify-center rounded-xl border border-border text-lg font-bold transition-colors hover:bg-accent"
           >
-            +
+            <Plus className="h-4 w-4" />
           </button>
-          <span className="ml-1 text-xs opacity-35">{guests === 1 ? "person" : "people"}</span>
+          <span className="ml-1 text-xs text-muted-foreground">{guests === 1 ? "person" : "people"}</span>
         </div>
       </div>
 
       {/* Events attending */}
       {events.length > 0 && (
         <div>
-          <p className="mb-3 text-[10px] font-semibold uppercase tracking-[2px] text-cream-800/40">
+          <p className="mb-3 text-[10px] font-semibold uppercase tracking-[2px] text-muted-foreground">
             Which events will you attend?
           </p>
           <div className="grid grid-cols-2 gap-2">
@@ -169,7 +179,7 @@ export function RsvpForm({ invitationId, events }: Props) {
                   className={`rounded-xl border p-3 text-left transition-all ${
                     selected
                       ? "border-current text-white"
-                      : "border-gold-200/25 bg-white hover:border-gold-400/40"
+                      : "border-border bg-card hover:border-primary/40"
                   }`}
                   style={selected ? { background: ev.color, borderColor: ev.color } : {}}
                 >
@@ -181,10 +191,10 @@ export function RsvpForm({ invitationId, events }: Props) {
                   </span>
                   {ev.date && (
                     <span
-                      className={`mt-0.5 block text-[10px] ${selected ? "text-white/70" : "opacity-35"}`}
+                      className={`mt-0.5 block text-[10px] ${selected ? "text-white/70" : "text-muted-foreground/50"}`}
                     >
                       {ev.date}
-                      {ev.time ? ` · ${ev.time}` : ""}
+                      {ev.time ? ` \u00B7 ${ev.time}` : ""}
                     </span>
                   )}
                 </button>
@@ -196,13 +206,13 @@ export function RsvpForm({ invitationId, events }: Props) {
 
       {/* Message */}
       <div>
-        <label htmlFor="rsvp-message" className="mb-2 block text-[10px] font-semibold uppercase tracking-[2px] text-cream-800/40">
+        <label htmlFor="rsvp-message" className="mb-2 block text-[10px] font-semibold uppercase tracking-[2px] text-muted-foreground">
           Message (optional)
         </label>
         <textarea
           id="rsvp-message"
           className="input-gold min-h-[80px] resize-y"
-          placeholder="Leave a heartfelt message for the couple…"
+          placeholder="Leave a heartfelt message for the couple..."
           value={message}
           onChange={(e) => setMessage(e.target.value)}
         />
@@ -215,11 +225,13 @@ export function RsvpForm({ invitationId, events }: Props) {
       >
         {submit.isPending ? (
           <span className="flex items-center justify-center gap-2">
-            <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-            Sending…
+            <Loader2 className="h-4 w-4 animate-spin" />
+            Sending...
           </span>
         ) : (
-          "✦ Confirm RSVP"
+          <span className="flex items-center justify-center gap-2">
+            <Send className="h-4 w-4" /> Confirm RSVP
+          </span>
         )}
       </button>
     </form>

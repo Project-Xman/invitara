@@ -1,5 +1,6 @@
 import { db } from "./drizzle";
-import { adImpressions } from "./schema";
+import { adImpressions, ads } from "./schema";
+import { eq, and, lte, gte, or, isNull } from "drizzle-orm";
 
 // ━━━ AD SLOTS ━━━
 export type AdSlot =
@@ -10,7 +11,7 @@ export type AdSlot =
   | "preview_footer"
   | "between_events";
 
-// ━━━ INTERNAL AD CATALOG ━━━
+// ━━━ INTERNAL AD TYPE ━━━
 export interface InternalAd {
   id: string;
   slot: AdSlot;
@@ -23,85 +24,29 @@ export interface InternalAd {
   priority: number;
 }
 
-export const INTERNAL_ADS: InternalAd[] = [
-  {
-    id: "upgrade-premium",
-    slot: "hero_banner",
-    title: "Go Premium ✦",
-    description: "Remove ads, unlock all templates, get AI design credits & custom domain.",
-    ctaText: "Upgrade Now — ₹3,999",
-    ctaLink: "/pricing",
-    gradient: "linear-gradient(135deg, #A67C2E 0%, #D4A853 50%, #FFD466 100%)",
-    icon: "👑",
-    priority: 10,
-  },
-  {
-    id: "ai-credits",
-    slot: "editor_bottom",
-    title: "AI-Powered Designs",
-    description: "Let AI generate unique color palettes and design suggestions for your invite.",
-    ctaText: "Try AI Design — 1 Credit",
-    ctaLink: "/ai-generate",
-    gradient: "linear-gradient(135deg, #4A3A6B 0%, #7A6AAB 50%, #D4A853 100%)",
-    icon: "✨",
-    priority: 8,
-  },
-  {
-    id: "credit-sale",
-    slot: "dashboard_top",
-    title: "Credit Sale!",
-    description: "Get 15 AI generation credits for just ₹249. Create stunning custom designs.",
-    ctaText: "Buy Credits →",
-    ctaLink: "/account",
-    gradient: "linear-gradient(135deg, #C73866 0%, #E8668E 50%, #D4A853 100%)",
-    icon: "🎁",
-    priority: 7,
-  },
-  {
-    id: "share-invite",
-    slot: "preview_footer",
-    title: "Love your invite?",
-    description: "Share Invitara with friends & earn 2 free AI credits per referral!",
-    ctaText: "Share & Earn",
-    ctaLink: "/account",
-    gradient: "linear-gradient(135deg, #1A4A3A 0%, #2A7A5A 50%, #D4A853 100%)",
-    icon: "💌",
-    priority: 5,
-  },
-  {
-    id: "template-new",
-    slot: "template_sidebar",
-    title: "New: Cherry Blossom 🌸",
-    description: "Our newest template is here — golden cherry blossoms for spring weddings.",
-    ctaText: "Preview Template",
-    ctaLink: "/templates",
-    gradient: "linear-gradient(135deg, #E8668E 0%, #FF99B5 50%, #D4A853 100%)",
-    icon: "🌸",
-    priority: 6,
-  },
-  {
-    id: "between-events-upgrade",
-    slot: "between_events",
-    title: "Remove this ad",
-    description: "Upgrade to Premium for an ad-free experience.",
-    ctaText: "Go Ad-Free",
-    ctaLink: "/pricing",
-    gradient: "linear-gradient(135deg, #D4A853 0%, #FFE49A 100%)",
-    icon: "✦",
-    priority: 3,
-  },
-];
-
-// ━━━ GET AD FOR SLOT ━━━
-export function getAdForSlot(slot: AdSlot, excludeIds: string[] = []): InternalAd | null {
-  const candidates = INTERNAL_ADS.filter((a) => a.slot === slot && !excludeIds.includes(a.id)).sort(
-    (a, b) => b.priority - a.priority
+// ━━━ GET AD FOR SLOT (DB-driven) ━━━
+export async function getAdForSlot(slot: AdSlot, excludeIds: string[] = []): Promise<InternalAd | null> {
+  const now = new Date();
+  const allAds = await db.select().from(ads).where(
+    and(
+      eq(ads.slot, slot),
+      eq(ads.active, true),
+      or(isNull(ads.startDate), lte(ads.startDate, now)),
+      or(isNull(ads.endDate), gte(ads.endDate, now))
+    )
   );
-  // Add some randomness
+
+  const candidates = allAds
+    .filter((a) => !excludeIds.includes(a.id))
+    .sort((a, b) => b.priority - a.priority);
+
+  if (candidates.length === 0) return null;
+
   if (candidates.length > 1 && Math.random() > 0.7) {
-    return candidates[Math.floor(Math.random() * candidates.length)];
+    const picked = candidates[Math.floor(Math.random() * candidates.length)];
+    return { ...picked, slot: picked.slot as AdSlot };
   }
-  return candidates[0] || null;
+  return { ...candidates[0], slot: candidates[0].slot as AdSlot };
 }
 
 // ━━━ TRACK AD IMPRESSION ━━━

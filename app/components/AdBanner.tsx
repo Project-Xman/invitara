@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { X, ArrowRight } from "lucide-react";
 import type { SafeUser } from "~/lib/auth";
 import * as actions from "~/lib/actions";
 
@@ -30,7 +31,6 @@ export function AdBanner({
 
   const handleCtaClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    // Fire-and-forget click tracking; don't block navigation on it
     actions.recordAdClick({ adSlot: slot, adId: ad.id }).catch(() => {});
     router.push(ad.ctaLink);
   };
@@ -39,7 +39,7 @@ export function AdBanner({
     <div className="ad-banner relative mb-6 p-5" style={{ background: ad.gradient }}>
       <div className="ad-label text-white/60">Ad</div>
       <button onClick={() => setDismissed(true)} className="ad-banner-dismiss text-white/60">
-        ✕
+        <X className="h-3 w-3" />
       </button>
       <div className="flex items-center gap-4 text-white">
         <span className="text-3xl">{ad.icon}</span>
@@ -49,26 +49,25 @@ export function AdBanner({
         </div>
         <button
           onClick={handleCtaClick}
-          className="shrink-0 rounded-full bg-white/20 px-4 py-2 text-xs font-semibold tracking-wide backdrop-blur-sm transition-all hover:bg-white/30"
+          className="flex shrink-0 items-center gap-1.5 rounded-full bg-white/20 px-4 py-2 text-xs font-semibold tracking-wide backdrop-blur-sm transition-all hover:bg-white/30"
         >
-          {ad.ctaText}
+          {ad.ctaText} <ArrowRight className="h-3 w-3" />
         </button>
       </div>
     </div>
   );
 }
 
-// Compact inline ad (between event cards, etc.)
 export function InlineAd({ user }: { user: SafeUser | null }) {
   if (user && !user.showAds) return null;
   return (
-    <div className="my-4 flex items-center gap-3 rounded-xl border border-gold-200/20 bg-gold-100/40 p-3">
-      <span className="text-[8px] font-semibold uppercase tracking-[1px] opacity-30">
+    <div className="my-4 flex items-center gap-3 rounded-xl border border-border/30 bg-accent/40 p-3">
+      <span className="text-[8px] font-semibold uppercase tracking-[1px] text-muted-foreground/40">
         Sponsored
       </span>
-      <p className="flex-1 text-xs opacity-40">Remove ads with any paid plan</p>
-      <Link href="/pricing" className="text-[10px] font-semibold text-gold-700 hover:underline">
-        Upgrade →
+      <p className="flex-1 text-xs text-muted-foreground/60">Remove ads with any paid plan</p>
+      <Link href="/pricing" className="flex items-center gap-1 text-[10px] font-semibold text-primary hover:underline">
+        Upgrade <ArrowRight className="h-3 w-3" />
       </Link>
     </div>
   );

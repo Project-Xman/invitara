@@ -51,12 +51,13 @@ export default async function PublicInvitePage({ params }: Props) {
   try {
     const data = await getInvitationBySlug({ slug });
     if (!data) return <InviteNotFound />;
-    const { invitation, events, template } = data;
+    const { invitation, events, template, showAds } = data;
     return (
       <InviteClient
         invitation={invitation as any}
         events={events as any}
         template={template as any}
+        showAds={showAds}
       />
     );
   } catch {

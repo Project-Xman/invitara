@@ -40,7 +40,9 @@ import {
   userOwnsTemplate,
   purchaseTemplate,
   upgradePlan,
-  PLANS,
+  canPublish,
+  getPlans as fetchPlans,
+  getPlansFromDB,
 } from "./purchases";
 import { getAdForSlot, trackAdImpression, trackAdClick, shouldShowAds, type AdSlot } from "./ads";
 import { assertRateLimit } from "./rate-limit";
@@ -277,10 +279,33 @@ export async function publishInvitation(data: { id: string }): Promise<{ slug: s
   if (!user) throw new Error("Not authenticated");
 
   const [inv] = await db
-    .select({ userId: invitations.userId, slug: invitations.slug })
+    .select({
+      userId: invitations.userId,
+      slug: invitations.slug,
+      templateId: invitations.templateId,
+      published: invitations.published,
+    })
     .from(invitations)
     .where(eq(invitations.id, data.id));
   if (!inv || inv.userId !== user.id) throw new Error("Forbidden");
+
+  // Check template ownership — paid templates require purchase or premium/royal plan
+  const ownsTemplate = await userOwnsTemplate(user.id, inv.templateId);
+  if (!ownsTemplate) {
+    throw new Error(
+      "You don't have access to this template. Purchase it individually or upgrade your plan."
+    );
+  }
+
+  // Check publish limit — only if not already published (re-publish is free)
+  if (!inv.published) {
+    const publishCheck = await canPublish(user.id);
+    if (!publishCheck.allowed) {
+      throw new Error(
+        `You've reached your plan's limit of ${publishCheck.max} published invitation${publishCheck.max === 1 ? "" : "s"}. Upgrade your plan to publish more.`
+      );
+    }
+  }
 
   await db
     .update(invitations)
@@ -491,7 +516,7 @@ export async function getAd(data?: { slot?: string }) {
     }
   }
   if (!showAds) return null;
-  const ad = getAdForSlot((data?.slot || "hero_banner") as AdSlot);
+  const ad = await getAdForSlot((data?.slot || "hero_banner") as AdSlot);
   if (ad) {
     await trackAdImpression(userId, ad.slot, ad.id);
   }
@@ -510,7 +535,7 @@ export async function recordAdClick(data: { adSlot: string; adId: string }): Pro
 
 // ━━━ PLAN/PRICING ━━━
 export async function getPlans() {
-  return PLANS;
+  return fetchPlans();
 }
 
 // ━━━ PUBLIC INVITE (by slug) ━━━
@@ -523,7 +548,13 @@ export async function getInvitationBySlug(data: { slug: string }) {
     .where(eq(events.invitationId, inv.id))
     .orderBy(events.sortOrder);
   const [tmpl] = await db.select().from(templates).where(eq(templates.id, inv.templateId)).limit(1);
-  return { invitation: inv, events: evs, template: tmpl ?? null };
+  // Check if invitation owner is on a free/ad-showing plan
+  const [owner] = await db
+    .select({ showAds: users.showAds })
+    .from(users)
+    .where(eq(users.id, inv.userId))
+    .limit(1);
+  return { invitation: inv, events: evs, template: tmpl ?? null, showAds: owner?.showAds ?? true };
 }
 
 // ━━━ RSVP SUBMISSION (guest-facing) ━━━
@@ -628,14 +659,16 @@ export async function createOrder(data: {
     throw new Error("Payment gateway not configured");
   }
 
-  const planPrices: Record<string, number> = { starter: 2999, premium: 3999, royal: 6999 };
   let amountInr = 0;
   let description = "";
 
   if (data.type === "subscription") {
     if (!data.plan) throw new Error("Plan is required");
-    amountInr = planPrices[data.plan] ?? 0;
-    description = `Invitara ${data.plan.charAt(0).toUpperCase() + data.plan.slice(1)} Plan`;
+    const allPlans = await getPlansFromDB();
+    const planData = allPlans.find((p) => p.id === data.plan);
+    if (!planData) throw new Error("Plan not found");
+    amountInr = planData.price;
+    description = `Invitara ${planData.name} Plan`;
   } else if (data.type === "credits") {
     if (!data.packageId) throw new Error("Package ID is required");
     const [pkg] = await db
