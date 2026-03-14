@@ -9,7 +9,10 @@ export async function userOwnsTemplate(userId: string, templateId: string): Prom
   if (user && (user.plan === "premium" || user.plan === "royal")) return true;
 
   // Check if free template
-  const [tmpl] = await db.select({ isFree: templates.isFree }).from(templates).where(eq(templates.id, templateId));
+  const [tmpl] = await db
+    .select({ isFree: templates.isFree })
+    .from(templates)
+    .where(eq(templates.id, templateId));
   if (tmpl?.isFree) return true;
 
   // Check individual purchase
@@ -48,7 +51,12 @@ export async function getUserTemplates(userId: string) {
 }
 
 // ━━━ PURCHASE TEMPLATE ━━━
-export async function purchaseTemplate(userId: string, templateId: string, paymentId: string) {
+export async function purchaseTemplate(
+  userId: string,
+  templateId: string,
+  paymentId: string,
+  status: "pending" | "completed" = "completed"
+) {
   const [tmpl] = await db.select().from(templates).where(eq(templates.id, templateId));
   if (!tmpl) throw new Error("Template not found");
 
@@ -62,18 +70,25 @@ export async function purchaseTemplate(userId: string, templateId: string, payme
     type: "template",
     amount: String(tmpl.price),
     currency: "INR",
-    status: "completed",
+    status,
     razorpayPaymentId: paymentId,
     metadata: { templateId, templateName: tmpl.name },
   });
 
-  // Record purchase
-  await db.insert(templatePurchases).values({ userId, templateId });
+  // Only grant access once payment is confirmed
+  if (status === "completed") {
+    await db.insert(templatePurchases).values({ userId, templateId });
+  }
   return tmpl;
 }
 
 // ━━━ UPGRADE PLAN ━━━
-export async function upgradePlan(userId: string, plan: "starter" | "premium" | "royal", paymentId: string) {
+export async function upgradePlan(
+  userId: string,
+  plan: "starter" | "premium" | "royal",
+  paymentId: string,
+  status: "pending" | "completed" = "completed"
+) {
   const planPrices = { starter: 2999, premium: 3999, royal: 6999 };
   const planCredits = { starter: 5, premium: 15, royal: 50 };
 
@@ -82,21 +97,28 @@ export async function upgradePlan(userId: string, plan: "starter" | "premium" | 
     type: "subscription",
     amount: String(planPrices[plan]),
     currency: "INR",
-    status: "completed",
+    status,
     razorpayPaymentId: paymentId,
     metadata: { plan },
   });
 
-  // Update user plan + remove ads + add bonus credits
-  const [user] = await db.select({ credits: users.credits }).from(users).where(eq(users.id, userId));
-  const newCredits = (user?.credits || 0) + planCredits[plan];
-
-  await db.update(users).set({
-    plan,
-    showAds: false,
-    credits: newCredits,
-    updatedAt: new Date(),
-  }).where(eq(users.id, userId));
+  // Only grant access once payment is confirmed
+  if (status === "completed") {
+    const [user] = await db
+      .select({ credits: users.credits })
+      .from(users)
+      .where(eq(users.id, userId));
+    const newCredits = (user?.credits || 0) + planCredits[plan];
+    await db
+      .update(users)
+      .set({
+        plan,
+        showAds: false,
+        credits: newCredits,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId));
+  }
 
   return { plan, bonusCredits: planCredits[plan] };
 }
@@ -109,7 +131,15 @@ export const PLANS = [
     price: 0,
     showAds: true,
     credits: 3,
-    features: ["2 Free Templates", "Up to 2 Events", "Basic Photo Gallery", "RSVP via WhatsApp", "Invitara Branding", "Ads Shown", "3 AI Credits"],
+    features: [
+      "2 Free Templates",
+      "Up to 2 Events",
+      "Basic Photo Gallery",
+      "RSVP via WhatsApp",
+      "Invitara Branding",
+      "Ads Shown",
+      "3 AI Credits",
+    ],
   },
   {
     id: "starter",
@@ -117,7 +147,15 @@ export const PLANS = [
     price: 2999,
     showAds: false,
     credits: 5,
-    features: ["Purchase Templates Individually", "Up to 5 Events", "Photo Gallery (8 photos)", "RSVP Dashboard", "No Ads", "Remove Branding", "5 Bonus AI Credits"],
+    features: [
+      "Purchase Templates Individually",
+      "Up to 5 Events",
+      "Photo Gallery (8 photos)",
+      "RSVP Dashboard",
+      "No Ads",
+      "Remove Branding",
+      "5 Bonus AI Credits",
+    ],
   },
   {
     id: "premium",
@@ -126,7 +164,17 @@ export const PLANS = [
     showAds: false,
     credits: 15,
     badge: "Most Popular",
-    features: ["ALL Templates Included", "Unlimited Events", "Photo Gallery (20 photos)", "RSVP Dashboard + Analytics", "No Ads", "Custom Domain", "Background Music", "15 Bonus AI Credits", "Priority Support"],
+    features: [
+      "ALL Templates Included",
+      "Unlimited Events",
+      "Photo Gallery (20 photos)",
+      "RSVP Dashboard + Analytics",
+      "No Ads",
+      "Custom Domain",
+      "Background Music",
+      "15 Bonus AI Credits",
+      "Priority Support",
+    ],
   },
   {
     id: "royal",
@@ -134,6 +182,16 @@ export const PLANS = [
     price: 6999,
     showAds: false,
     credits: 50,
-    features: ["Everything in Premium", "Custom Design Tweaks", "Video Background", "Multi-language Support", "Guest Management CRM", "QR Code Invites", "50 Bonus AI Credits", "Concierge Setup", "Dedicated Manager"],
+    features: [
+      "Everything in Premium",
+      "Custom Design Tweaks",
+      "Video Background",
+      "Multi-language Support",
+      "Guest Management CRM",
+      "QR Code Invites",
+      "50 Bonus AI Credits",
+      "Concierge Setup",
+      "Dedicated Manager",
+    ],
   },
 ] as const;

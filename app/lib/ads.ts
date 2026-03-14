@@ -2,7 +2,13 @@ import { db } from "./drizzle";
 import { adImpressions } from "./schema";
 
 // ━━━ AD SLOTS ━━━
-export type AdSlot = "hero_banner" | "template_sidebar" | "editor_bottom" | "dashboard_top" | "preview_footer" | "between_events";
+export type AdSlot =
+  | "hero_banner"
+  | "template_sidebar"
+  | "editor_bottom"
+  | "dashboard_top"
+  | "preview_footer"
+  | "between_events";
 
 // ━━━ INTERNAL AD CATALOG ━━━
 export interface InternalAd {
@@ -88,9 +94,9 @@ export const INTERNAL_ADS: InternalAd[] = [
 
 // ━━━ GET AD FOR SLOT ━━━
 export function getAdForSlot(slot: AdSlot, excludeIds: string[] = []): InternalAd | null {
-  const candidates = INTERNAL_ADS
-    .filter((a) => a.slot === slot && !excludeIds.includes(a.id))
-    .sort((a, b) => b.priority - a.priority);
+  const candidates = INTERNAL_ADS.filter((a) => a.slot === slot && !excludeIds.includes(a.id)).sort(
+    (a, b) => b.priority - a.priority
+  );
   // Add some randomness
   if (candidates.length > 1 && Math.random() > 0.7) {
     return candidates[Math.floor(Math.random() * candidates.length)];
@@ -99,12 +105,24 @@ export function getAdForSlot(slot: AdSlot, excludeIds: string[] = []): InternalA
 }
 
 // ━━━ TRACK AD IMPRESSION ━━━
-export async function trackAdImpression(userId: string | null, adSlot: string, clicked = false) {
+export async function trackAdImpression(userId: string | null, adSlot: string, adId?: string) {
   await db.insert(adImpressions).values({
     userId,
     adSlot,
+    adId: adId ?? null,
     adProvider: "internal",
-    clicked,
+    clicked: false,
+  });
+}
+
+// ━━━ TRACK AD CLICK ━━━
+export async function trackAdClick(userId: string | null, adSlot: string, adId: string) {
+  await db.insert(adImpressions).values({
+    userId,
+    adSlot,
+    adId,
+    adProvider: "internal",
+    clicked: true,
   });
 }
 

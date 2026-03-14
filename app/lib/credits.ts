@@ -4,40 +4,75 @@ import { eq, desc } from "drizzle-orm";
 
 // ━━━ CHECK BALANCE ━━━
 export async function getCredits(userId: string): Promise<number> {
-  const [user] = await db.select({ credits: users.credits }).from(users).where(eq(users.id, userId));
+  const [user] = await db
+    .select({ credits: users.credits })
+    .from(users)
+    .where(eq(users.id, userId));
   return user?.credits ?? 0;
 }
 
-// ━━━ DEBIT CREDITS ━━━
-export async function debitCredits(userId: string, amount: number, reason: string, refId?: string): Promise<boolean> {
-  const balance = await getCredits(userId);
-  if (balance < amount) return false;
+// ━━━ DEBIT CREDITS (transactional — prevents double-spend race conditions) ━━━
+export async function debitCredits(
+  userId: string,
+  amount: number,
+  reason: string,
+  refId?: string
+): Promise<boolean> {
+  return db.transaction(async (tx) => {
+    // SELECT FOR UPDATE locks the row for the duration of the transaction
+    const [user] = await tx
+      .select({ credits: users.credits })
+      .from(users)
+      .where(eq(users.id, userId))
+      .for("update");
 
-  const newBalance = balance - amount;
-  await db.update(users).set({ credits: newBalance, updatedAt: new Date() }).where(eq(users.id, userId));
-  await db.insert(creditTransactions).values({
-    userId,
-    amount: -amount,
-    balance: newBalance,
-    reason,
-    referenceId: refId,
+    if (!user || user.credits < amount) return false;
+
+    const newBalance = user.credits - amount;
+    await tx
+      .update(users)
+      .set({ credits: newBalance, updatedAt: new Date() })
+      .where(eq(users.id, userId));
+    await tx.insert(creditTransactions).values({
+      userId,
+      amount: -amount,
+      balance: newBalance,
+      reason,
+      referenceId: refId,
+    });
+    return true;
   });
-  return true;
 }
 
-// ━━━ ADD CREDITS ━━━
-export async function addCredits(userId: string, amount: number, reason: string, refId?: string): Promise<number> {
-  const balance = await getCredits(userId);
-  const newBalance = balance + amount;
-  await db.update(users).set({ credits: newBalance, updatedAt: new Date() }).where(eq(users.id, userId));
-  await db.insert(creditTransactions).values({
-    userId,
-    amount,
-    balance: newBalance,
-    reason,
-    referenceId: refId,
+// ━━━ ADD CREDITS (transactional) ━━━
+export async function addCredits(
+  userId: string,
+  amount: number,
+  reason: string,
+  refId?: string
+): Promise<number> {
+  return db.transaction(async (tx) => {
+    const [user] = await tx
+      .select({ credits: users.credits })
+      .from(users)
+      .where(eq(users.id, userId))
+      .for("update");
+
+    const currentBalance = user?.credits ?? 0;
+    const newBalance = currentBalance + amount;
+    await tx
+      .update(users)
+      .set({ credits: newBalance, updatedAt: new Date() })
+      .where(eq(users.id, userId));
+    await tx.insert(creditTransactions).values({
+      userId,
+      amount,
+      balance: newBalance,
+      reason,
+      referenceId: refId,
+    });
+    return newBalance;
   });
-  return newBalance;
 }
 
 // ━━━ CREDIT HISTORY ━━━
@@ -56,7 +91,12 @@ export async function getCreditPackages() {
 }
 
 // ━━━ PURCHASE CREDITS ━━━
-export async function purchaseCredits(userId: string, packageId: number, paymentId: string) {
+export async function purchaseCredits(
+  userId: string,
+  packageId: number,
+  paymentId: string,
+  status: "pending" | "completed" = "completed"
+) {
   const [pkg] = await db.select().from(creditPackages).where(eq(creditPackages.id, packageId));
   if (!pkg) throw new Error("Package not found");
 
@@ -66,13 +106,16 @@ export async function purchaseCredits(userId: string, packageId: number, payment
     type: "credits",
     amount: String(pkg.priceInr),
     currency: "INR",
-    status: "completed",
+    status,
     razorpayPaymentId: paymentId,
     metadata: { packageId, credits: pkg.credits },
   });
 
-  // Add credits
-  const newBalance = await addCredits(userId, pkg.credits, `Purchased ${pkg.name} pack`, paymentId);
+  // Only add credits once payment is confirmed
+  let newBalance = 0;
+  if (status === "completed") {
+    newBalance = await addCredits(userId, pkg.credits, `Purchased ${pkg.name} pack`, paymentId);
+  }
   return { credits: pkg.credits, newBalance };
 }
 
