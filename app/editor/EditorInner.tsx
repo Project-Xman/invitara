@@ -10,6 +10,7 @@ import {
   sessionQueryOptions,
   invitationQueryOptions,
   eventsQueryOptions,
+  adQueryOptions,
   useSaveInvitation,
   useAddEvent,
   useRemoveEvent,
@@ -57,6 +58,7 @@ export function EditorInner() {
 
   const { data: allTemplates = [] } = useQuery(templatesQueryOptions());
   const { data: user } = useQuery(sessionQueryOptions());
+  const { data: editorAd } = useQuery(adQueryOptions("editor_bottom"));
 
   const { data: existingInv, isLoading: invLoading } = useQuery({
     ...invitationQueryOptions(invitationIdParam ?? ""),
@@ -466,19 +468,7 @@ export function EditorInner() {
             {/* Ad */}
             {(!user || user.showAds) && tab !== "ai" && tab !== "media" && (
               <div className="mt-6">
-                <AdBanner
-                  user={user ?? null}
-                  slot="editor_bottom"
-                  ad={{
-                    id: "ai-cta",
-                    title: "AI-Powered Designs",
-                    description: "Let AI generate unique palettes and suggestions.",
-                    ctaText: "Try AI Tab",
-                    ctaLink: "/editor",
-                    gradient: "linear-gradient(135deg,#4A3A6B,#7A6AAB,#D4A853)",
-                    icon: "",
-                  }}
-                />
+                <AdBanner user={user ?? null} slot="editor_bottom" ad={editorAd ?? null} />
               </div>
             )}
           </div>

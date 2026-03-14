@@ -406,7 +406,7 @@ export default function AdminUsersPage() {
   const [banUser, setBanUser] = useState<AdminUser | null>(null);
 
   // Debounced search
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const handleSearch = useCallback((value: string) => {
     setSearch(value);
     clearTimeout(debounceRef.current);
@@ -426,8 +426,8 @@ export default function AdminUsersPage() {
     })
   );
 
-  const users = (data?.data ?? []) as AdminUser[];
-  const total = data?.total ?? 0;
+  const users = ((data as any)?.data ?? []) as AdminUser[];
+  const total = (data as any)?.total ?? 0;
   const totalPages = Math.ceil(total / 20);
 
   const columns = useMemo(

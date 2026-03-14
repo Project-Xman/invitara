@@ -10,6 +10,7 @@ import {
   rsvpsQueryOptions,
   analyticsQueryOptions,
   eventsQueryOptions,
+  adQueryOptions,
   useDeleteInvitation,
   useUnpublishInvitation,
 } from "~/lib/queries";
@@ -49,6 +50,7 @@ export default function DashboardPage() {
   const [showShare, setShowShare] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 
+  const { data: dashboardAd } = useQuery(adQueryOptions("dashboard_top"));
   const deleteInv = useDeleteInvitation();
   const unpublishInv = useUnpublishInvitation();
 
@@ -172,19 +174,7 @@ export default function DashboardPage() {
 
         {/* Ad */}
         {(!user || user?.showAds) && (
-          <AdBanner
-            user={user ?? null}
-            slot="dashboard_top"
-            ad={{
-              id: "credit-sale",
-              title: "Credit Sale!",
-              description: "Get 15 AI generation credits for just \u20B9249.",
-              ctaText: "Buy Credits",
-              ctaLink: "/account",
-              gradient: "linear-gradient(135deg,#C73866,#E8668E,#D4A853)",
-              icon: "",
-            }}
-          />
+          <AdBanner user={user ?? null} slot="dashboard_top" ad={dashboardAd ?? null} />
         )}
 
         {/* Quick Actions */}

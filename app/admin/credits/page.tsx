@@ -236,7 +236,7 @@ export default function AdminCreditsPage() {
   const [editingPackage, setEditingPackage] = useState<CreditPackage | null>(null);
 
   const { data, isLoading } = useQuery(adminCreditPackagesQueryOptions());
-  const packages = (data?.data ?? data ?? []) as CreditPackage[];
+  const packages = (data ?? []) as unknown as CreditPackage[];
 
   const toggleActive = useToggleCreditPackageActive();
 

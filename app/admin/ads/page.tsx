@@ -564,7 +564,7 @@ export default function AdminAdsPage() {
   const [deletingAd, setDeletingAd] = useState<Ad | null>(null);
 
   const { data, isLoading } = useQuery(adminAdsQueryOptions());
-  const ads = (data?.data ?? data ?? []) as Ad[];
+  const ads = (data ?? []) as unknown as Ad[];
 
   const columns = useMemo(
     () => [

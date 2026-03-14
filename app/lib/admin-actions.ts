@@ -280,12 +280,13 @@ export async function getRetentionCohorts(data: { weeks: number }) {
     { cohortWeek: string; cohortSize: number; retention: Record<number, number> }
   >();
 
-  for (const row of rows.rows as Array<{
+  type CohortRow = {
     cohort_week: string;
     cohort_size: number;
     week_number: number | null;
     active_users: number | null;
-  }>) {
+  };
+  for (const row of rows as unknown as CohortRow[]) {
     const key = row.cohort_week;
     if (!cohortMap.has(key)) {
       cohortMap.set(key, {

@@ -155,7 +155,7 @@ export default function AdminPaymentsPage() {
   const pageSize = 25;
 
   // Debounced search
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const handleSearch = useCallback((value: string) => {
     setSearch(value);
     clearTimeout(debounceRef.current);
@@ -180,8 +180,8 @@ export default function AdminPaymentsPage() {
     })
   );
 
-  const payments = (data?.data ?? []) as Payment[];
-  const total = data?.total ?? 0;
+  const payments = ((data as any)?.data ?? []) as Payment[];
+  const total = (data as any)?.total ?? 0;
   const totalPages = Math.ceil(total / pageSize);
 
   const columns = useMemo(

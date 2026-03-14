@@ -231,7 +231,7 @@ export default function AdminInvitationsPage() {
   const [deleteTarget, setDeleteTarget] = useState<AdminInvitation | null>(null);
 
   // Debounced search
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const handleSearch = useCallback((value: string) => {
     setSearch(value);
     clearTimeout(debounceRef.current);
@@ -254,8 +254,8 @@ export default function AdminInvitationsPage() {
   // Fetch templates for filter dropdown
   const { data: templatesData } = useQuery(adminTemplatesQueryOptions());
 
-  const invitations = (data?.data ?? []) as AdminInvitation[];
-  const total = data?.total ?? 0;
+  const invitations = ((data as any)?.data ?? []) as AdminInvitation[];
+  const total = (data as any)?.total ?? 0;
   const totalPages = Math.ceil(total / 20);
 
   const columns = useMemo(

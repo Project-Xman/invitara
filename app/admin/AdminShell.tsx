@@ -19,7 +19,7 @@ import {
   Sparkles,
 } from "lucide-react";
 
-const NAV_ITEMS = [
+const NAV_ITEMS: readonly { href: string; icon: typeof BarChart3; label: string; exact?: boolean }[] = [
   { href: "/admin", icon: BarChart3, label: "Overview", exact: true },
   { href: "/admin/users", icon: Users, label: "Users" },
   { href: "/admin/invitations", icon: FileText, label: "Invitations" },
@@ -28,7 +28,7 @@ const NAV_ITEMS = [
   { href: "/admin/ads", icon: Megaphone, label: "Ads" },
   { href: "/admin/payments", icon: Receipt, label: "Payments" },
   { href: "/admin/credits", icon: Coins, label: "Credits" },
-] as const;
+];
 
 function isActive(pathname: string, href: string, exact?: boolean): boolean {
   if (exact) return pathname === href;

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { templatesQueryOptions, sessionQueryOptions, plansQueryOptions } from "~/lib/queries";
+import { templatesQueryOptions, sessionQueryOptions, plansQueryOptions, adQueryOptions } from "~/lib/queries";
 import { AdBanner } from "~/components/AdBanner";
 
 import {
@@ -70,6 +70,7 @@ export default function HomeClient() {
   const { data: tmpls = [] } = useQuery(templatesQueryOptions(cat));
   const { data: user } = useQuery(sessionQueryOptions());
   const { data: plans = [] } = useQuery(plansQueryOptions());
+  const { data: heroAd } = useQuery(adQueryOptions("hero_banner"));
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   return (
@@ -104,19 +105,7 @@ export default function HomeClient() {
       {/* AD */}
       {(!user || user.showAds) && (
         <div className="mx-auto mt-10 max-w-[1320px] px-6 lg:px-8">
-          <AdBanner
-            user={user || null}
-            slot="hero_banner"
-            ad={{
-              id: "upgrade",
-              title: "Go Premium",
-              description: "Remove ads, unlock all templates, get AI credits & custom domain.",
-              ctaText: "Upgrade Now",
-              ctaLink: "/pricing",
-              gradient: "linear-gradient(135deg,#A67C2E 0%,#D4A853 50%,#FFD466 100%)",
-              icon: "",
-            }}
-          />
+          <AdBanner user={user || null} slot="hero_banner" ad={heroAd ?? null} />
         </div>
       )}
 
