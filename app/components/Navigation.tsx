@@ -33,6 +33,7 @@ export function Navigation() {
       ? [
           { href: "/dashboard", l: "Dashboard" },
           { href: "/account", l: "Account" },
+          ...(user.isAdmin ? [{ href: "/admin", l: "Admin" }] : []),
         ]
       : []),
   ];
