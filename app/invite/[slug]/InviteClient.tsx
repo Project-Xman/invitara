@@ -99,7 +99,7 @@ export function InviteClient({ invitation, events, template }: InviteClientProps
         <audio src={invData.musicUrl} autoPlay loop className="hidden" />
       )}
 
-      <div className="mx-auto max-w-lg bg-white shadow-gold-xl">
+      <div className="mx-auto w-full">
         <InvitationPreview
           invitation={invData}
           events={events}
@@ -108,7 +108,7 @@ export function InviteClient({ invitation, events, template }: InviteClientProps
         />
       </div>
 
-      <div className="mx-auto max-w-lg px-6 py-10">
+      <div className="mx-auto max-w-2xl px-6 py-10">
         <div className="mb-8 text-center">
           <p className="mb-2 text-[11px] font-semibold uppercase tracking-[3px] text-gold-600/70">
             RSVP

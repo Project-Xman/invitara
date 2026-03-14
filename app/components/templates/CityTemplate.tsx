@@ -15,12 +15,12 @@ export default function CityTemplate({
 
   return (
     <div
-      className={fullWidth ? "mx-auto max-w-lg" : ""}
+      className={fullWidth ? "w-full" : ""}
       style={{ background: tc.bg, fontFamily: "'Inter', sans-serif" }}
     >
       {/* Hero - Dark metro with gold geometric accents */}
       <div
-        className="relative flex min-h-[500px] items-center justify-center overflow-hidden"
+        className="relative flex min-h-screen items-center justify-center overflow-hidden"
         style={{ background: "#0A0A0A" }}
       >
         {/* Diagonal gold line pattern */}
@@ -96,35 +96,35 @@ export default function CityTemplate({
           />
         </div>
         {/* Content */}
-        <div className="relative z-10 px-8 py-20 text-center">
+        <div className="relative z-10 mx-auto max-w-4xl px-8 py-20 text-center">
           <p
-            className="mb-8 text-[9px] font-medium uppercase tracking-[8px]"
+            className="mb-8 text-[9px] font-medium uppercase tracking-[8px] md:text-xs"
             style={{ color: tc.primary + "80" }}
           >
             You're Cordially Invited
           </p>
-          <h1 className="font-display text-[46px] leading-none tracking-wide text-white">
+          <h1 className="font-display text-[46px] leading-none tracking-wide text-white md:text-[72px] lg:text-[96px]">
             {inv.groomName}
           </h1>
           <div className="my-4 flex items-center justify-center gap-5">
-            <span className="h-px w-14" style={{ background: tc.primary + "40" }} />
-            <span className="font-display text-xl italic" style={{ color: tc.primary }}>
+            <span className="h-px w-14 md:w-24" style={{ background: tc.primary + "40" }} />
+            <span className="font-display text-xl italic md:text-2xl" style={{ color: tc.primary }}>
               &
             </span>
-            <span className="h-px w-14" style={{ background: tc.primary + "40" }} />
+            <span className="h-px w-14 md:w-24" style={{ background: tc.primary + "40" }} />
           </div>
-          <h1 className="font-display text-[46px] leading-none tracking-wide text-white">
+          <h1 className="font-display text-[46px] leading-none tracking-wide text-white md:text-[72px] lg:text-[96px]">
             {inv.brideName}
           </h1>
           <div className="mt-10 pt-6" style={{ borderTop: `1px solid ${tc.primary}25` }}>
             <p
-              className="text-[10px] uppercase tracking-[4px]"
+              className="text-[10px] uppercase tracking-[4px] md:text-sm"
               style={{ color: tc.primary + "90" }}
             >
               {dateStr}
             </p>
             <p
-              className="mt-1 text-[10px] uppercase tracking-[3px]"
+              className="mt-1 text-[10px] uppercase tracking-[3px] md:text-xs"
               style={{ color: tc.primary + "50" }}
             >
               {inv.venue || ""}
@@ -141,8 +141,9 @@ export default function CityTemplate({
 
       {/* Blessings */}
       <SectionReveal>
-        <div className="px-6 py-14 text-center" style={{ background: tc.card }}>
-          <p className="mb-2 text-lg" style={{ color: tc.secondary }}>
+        <div className="px-6 py-14 text-center md:px-12 md:py-20 lg:px-16 lg:py-28" style={{ background: tc.card }}>
+          <div className="mx-auto max-w-3xl">
+          <p className="mb-2 text-lg md:text-xl" style={{ color: tc.secondary }}>
             {inv.mantra ||
               "\u0950 \u0936\u094D\u0930\u0940 \u0917\u0923\u0947\u0936\u093E\u092F \u0928\u092E\u0903"}
           </p>
@@ -171,20 +172,21 @@ export default function CityTemplate({
           <p className="text-sm opacity-50" style={{ color: tc.text }}>
             You to the wedding celebrations of
           </p>
-          <p className="mt-3 font-display text-2xl font-bold" style={{ color: tc.primary }}>
+          <p className="mt-3 font-display text-2xl font-bold md:text-3xl" style={{ color: tc.primary }}>
             {inv.groomName} <span className="font-body text-base opacity-30">&</span>{" "}
             {inv.brideName}
           </p>
           {inv.groomFamily && (
-            <p className="mt-4 text-xs opacity-40" style={{ color: tc.text }}>
+            <p className="mt-4 text-xs opacity-40 md:text-sm" style={{ color: tc.text }}>
               Son of {inv.groomFamily}
             </p>
           )}
           {inv.brideFamily && (
-            <p className="mt-1 text-xs opacity-40" style={{ color: tc.text }}>
+            <p className="mt-1 text-xs opacity-40 md:text-sm" style={{ color: tc.text }}>
               Daughter of {inv.brideFamily}
             </p>
           )}
+          </div>
         </div>
       </SectionReveal>
 
@@ -194,19 +196,19 @@ export default function CityTemplate({
       />
 
       {/* Events - Horizontal timeline style */}
-      <div className="px-5 py-12" style={{ background: tc.bg }}>
+      <div className="px-6 py-14 md:px-12 md:py-20 lg:px-16 lg:py-28" style={{ background: tc.bg }}>
         <SectionReveal>
           <h2
-            className="mb-1 text-center font-display text-2xl font-bold"
+            className="mb-1 text-center font-display text-2xl font-bold md:text-3xl lg:text-4xl"
             style={{ color: tc.primary }}
           >
             The Celebrations
           </h2>
-          <p className="mb-10 text-center text-sm opacity-40" style={{ color: tc.text }}>
+          <p className="mb-10 text-center text-sm opacity-40 md:text-base" style={{ color: tc.text }}>
             A timeline of festivities
           </p>
         </SectionReveal>
-        <div className="relative">
+        <div className="relative mx-auto max-w-4xl">
           {/* Vertical connecting line */}
           <div
             className="absolute bottom-0 left-[22px] top-0 w-px"
@@ -258,21 +260,23 @@ export default function CityTemplate({
       {/* Message */}
       {inv.message && (
         <SectionReveal>
-          <div className="px-8 py-14 text-center" style={{ background: tc.card }}>
-            <div className="mx-auto mb-6 h-px w-8" style={{ background: tc.primary + "40" }} />
-            <p
-              className="mb-4 text-[9px] font-semibold uppercase tracking-[5px]"
-              style={{ color: tc.primary }}
-            >
-              A Note from Us
-            </p>
-            <p
-              className="mx-auto max-w-sm font-body text-sm leading-[2] opacity-55"
-              style={{ color: tc.text }}
-            >
-              {inv.message}
-            </p>
-            <div className="mx-auto mt-6 h-px w-8" style={{ background: tc.primary + "40" }} />
+          <div className="px-6 py-14 text-center md:px-12 md:py-20 lg:px-16 lg:py-28" style={{ background: tc.card }}>
+            <div className="mx-auto max-w-3xl">
+              <div className="mx-auto mb-6 h-px w-8" style={{ background: tc.primary + "40" }} />
+              <p
+                className="mb-4 text-[9px] font-semibold uppercase tracking-[5px] md:text-xs"
+                style={{ color: tc.primary }}
+              >
+                A Note from Us
+              </p>
+              <p
+                className="mx-auto max-w-xl font-body text-sm leading-[2] opacity-55 md:text-base lg:text-lg"
+                style={{ color: tc.text }}
+              >
+                {inv.message}
+              </p>
+              <div className="mx-auto mt-6 h-px w-8" style={{ background: tc.primary + "40" }} />
+            </div>
           </div>
         </SectionReveal>
       )}
@@ -284,14 +288,14 @@ export default function CityTemplate({
 
       {/* Gallery */}
       <SectionReveal>
-        <div className="px-5 py-12" style={{ background: tc.bg }}>
+        <div className="px-6 py-14 md:px-12 md:py-20 lg:px-16 lg:py-28" style={{ background: tc.bg }}>
           <h2
-            className="mb-6 text-center font-display text-xl font-bold"
+            className="mb-6 text-center font-display text-xl font-bold md:text-3xl lg:text-4xl"
             style={{ color: tc.primary }}
           >
             Our Moments
           </h2>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="mx-auto max-w-4xl grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
             {["\uD83D\uDCF8", "\uD83D\uDC95", "\u2728", "\uD83C\uDF05"].map((e, i) => (
               <div
                 key={i}
@@ -312,9 +316,10 @@ export default function CityTemplate({
 
       {/* Things to Know */}
       <SectionReveal>
-        <div className="px-6 py-12" style={{ background: tc.card }}>
+        <div className="px-6 py-14 md:px-12 md:py-20 lg:px-16 lg:py-28" style={{ background: tc.card }}>
+          <div className="mx-auto max-w-3xl">
           <h2
-            className="mb-6 text-center font-display text-xl font-bold"
+            className="mb-6 text-center font-display text-xl font-bold md:text-3xl lg:text-4xl"
             style={{ color: tc.primary }}
           >
             Things to Know
@@ -332,15 +337,16 @@ export default function CityTemplate({
             >
               <span className="w-8 shrink-0 text-center text-xl">{item.icon}</span>
               <div>
-                <p className="text-sm font-semibold" style={{ color: tc.text }}>
+                <p className="text-sm font-semibold md:text-base" style={{ color: tc.text }}>
                   {item.title}
                 </p>
-                <p className="text-xs opacity-40" style={{ color: tc.text }}>
+                <p className="text-xs opacity-40 md:text-sm" style={{ color: tc.text }}>
                   {item.desc}
                 </p>
               </div>
             </div>
           ))}
+          </div>
         </div>
       </SectionReveal>
 
@@ -351,17 +357,19 @@ export default function CityTemplate({
 
       {/* RSVP */}
       <SectionReveal>
-        <div className="px-6 py-12 text-center" style={{ background: tc.bg }}>
-          <div className="mb-3 text-4xl">💌</div>
-          <h2 className="mb-2 font-display text-xl font-bold" style={{ color: tc.primary }}>
-            RSVP
-          </h2>
-          <button
-            className="w-full rounded-lg py-3.5 text-sm font-semibold uppercase tracking-[2px] text-white"
-            style={{ background: tc.primary }}
-          >
-            💬 RSVP on WhatsApp
-          </button>
+        <div className="px-6 py-14 text-center md:px-12 md:py-20 lg:px-16 lg:py-28" style={{ background: tc.bg }}>
+          <div className="mx-auto max-w-xl">
+            <div className="mb-3 text-4xl">💌</div>
+            <h2 className="mb-2 font-display text-xl font-bold md:text-3xl" style={{ color: tc.primary }}>
+              RSVP
+            </h2>
+            <button
+              className="w-full rounded-lg py-3.5 text-sm font-semibold uppercase tracking-[2px] text-white md:py-4 md:text-base"
+              style={{ background: tc.primary }}
+            >
+              💬 RSVP on WhatsApp
+            </button>
+          </div>
         </div>
       </SectionReveal>
 
@@ -372,11 +380,11 @@ export default function CityTemplate({
 
       {/* Countdown */}
       <SectionReveal>
-        <div className="px-6 py-12 text-center" style={{ background: tc.card }}>
-          <h2 className="mb-6 font-display text-xl font-bold" style={{ color: tc.primary }}>
+        <div className="px-6 py-14 text-center md:px-12 md:py-20 lg:px-16 lg:py-28" style={{ background: tc.card }}>
+          <h2 className="mb-6 font-display text-xl font-bold md:text-3xl lg:text-4xl" style={{ color: tc.primary }}>
             The Countdown
           </h2>
-          <div className="flex justify-center gap-3">
+          <div className="flex justify-center gap-3 md:gap-5 lg:gap-6">
             {[
               { v: cd.d, l: "Days" },
               { v: cd.h, l: "Hours" },
@@ -385,7 +393,7 @@ export default function CityTemplate({
             ].map((u, i) => (
               <div key={i} className="text-center">
                 <div
-                  className="flex h-16 w-16 items-center justify-center rounded-lg border font-display text-2xl font-bold"
+                  className="flex h-16 w-16 items-center justify-center rounded-lg border font-display text-2xl font-bold md:h-20 md:w-20 md:text-3xl lg:h-24 lg:w-24 lg:text-4xl"
                   style={{
                     borderColor: tc.primary + "15",
                     color: tc.primary,
@@ -395,7 +403,7 @@ export default function CityTemplate({
                   {String(u.v).padStart(2, "0")}
                 </div>
                 <span
-                  className="mt-1 block text-[9px] font-medium uppercase tracking-[2px] opacity-35"
+                  className="mt-1 block text-[9px] font-medium uppercase tracking-[2px] opacity-35 md:text-xs"
                   style={{ color: tc.text }}
                 >
                   {u.l}
@@ -407,8 +415,8 @@ export default function CityTemplate({
       </SectionReveal>
 
       {/* Footer */}
-      <div className="px-6 py-14 text-center" style={{ background: "#0A0A0A" }}>
-        <div className="mb-2 font-display text-2xl tracking-wide text-white">
+      <div className="px-6 py-14 text-center md:py-20" style={{ background: "#0A0A0A" }}>
+        <div className="mb-2 font-display text-2xl tracking-wide text-white md:text-3xl lg:text-4xl">
           {inv.groomName} & {inv.brideName}
         </div>
         <p className="text-xs text-white opacity-25">We look forward to celebrating with you!</p>

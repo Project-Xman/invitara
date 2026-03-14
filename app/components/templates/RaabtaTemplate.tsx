@@ -15,18 +15,19 @@ export default function RaabtaTemplate({
 
   return (
     <div
-      className={fullWidth ? "mx-auto max-w-lg" : ""}
+      className={fullWidth ? "w-full" : ""}
       style={{ background: tc.bg, fontFamily: "'Cormorant Garamond', serif" }}
     >
       {/* Bismillah Section */}
       <SectionReveal>
         <div
-          className="px-6 py-10 text-center"
+          className="px-6 py-14 text-center md:px-12 md:py-20 lg:px-16 lg:py-28"
           style={{
             background: `linear-gradient(180deg, ${tc.primary}12 0%, ${tc.card} 100%)`,
           }}
         >
-          <p className="mb-2 font-heading text-lg tracking-wide" style={{ color: tc.secondary }}>
+          <div className="mx-auto max-w-3xl">
+          <p className="mb-2 font-heading text-lg tracking-wide md:text-xl" style={{ color: tc.secondary }}>
             Bismillah ir-Rahman ir-Rahim
           </p>
           <p className="font-sans text-xs opacity-40" style={{ color: tc.text }}>
@@ -39,12 +40,13 @@ export default function RaabtaTemplate({
             <span className="h-px w-12" style={{ background: tc.secondary + "30" }} />
             <GeometricStar color={tc.secondary} size={8} />
           </div>
+          </div>
         </div>
       </SectionReveal>
 
       {/* Hero - Deep green with Moorish arch frame */}
       <div
-        className="relative flex min-h-[460px] items-center justify-center overflow-hidden"
+        className="relative flex min-h-screen items-center justify-center overflow-hidden"
         style={{ background: tc.primary }}
       >
         {/* Arabesque background pattern */}
@@ -89,11 +91,11 @@ export default function RaabtaTemplate({
           <CrescentStar color={tc.secondary} />
         </div>
         {/* Content */}
-        <div className="relative z-10 px-8 py-20 text-center text-white">
-          <p className="mb-6 mt-4 font-sans text-[9px] font-medium uppercase tracking-[6px] opacity-50">
+        <div className="relative z-10 mx-auto max-w-4xl px-8 py-20 text-center text-white">
+          <p className="mb-6 mt-4 font-sans text-[9px] font-medium uppercase tracking-[6px] opacity-50 md:text-xs">
             You Are Cordially Invited
           </p>
-          <h1 className="font-script text-[50px] leading-none drop-shadow-lg">{inv.groomName}</h1>
+          <h1 className="font-script text-[48px] leading-none drop-shadow-lg md:text-[72px] lg:text-[96px]">{inv.groomName}</h1>
           <div className="my-3 flex items-center justify-center gap-4">
             <span className="h-px w-10 bg-white/20" />
             <span className="text-lg" style={{ color: tc.secondary + "AA" }}>
@@ -101,7 +103,7 @@ export default function RaabtaTemplate({
             </span>
             <span className="h-px w-10 bg-white/20" />
           </div>
-          <h1 className="font-script text-[50px] leading-none drop-shadow-lg">{inv.brideName}</h1>
+          <h1 className="font-script text-[48px] leading-none drop-shadow-lg md:text-[72px] lg:text-[96px]">{inv.brideName}</h1>
           <div className="mt-8 border-t border-white/15 pt-5">
             <p className="font-sans text-xs uppercase tracking-[3px] opacity-50">{dateStr}</p>
             <p className="mt-1 font-sans text-[10px] uppercase tracking-[2px] opacity-30">
@@ -116,7 +118,8 @@ export default function RaabtaTemplate({
 
       {/* Blessings */}
       <SectionReveal>
-        <div className="px-6 py-14 text-center" style={{ background: tc.card }}>
+        <div className="px-6 py-14 text-center md:px-12 md:py-20 lg:px-16 lg:py-28" style={{ background: tc.card }}>
+          <div className="mx-auto max-w-3xl">
           <div className="mb-4 text-3xl">🤲</div>
           <p className="font-sans text-sm opacity-50" style={{ color: tc.text }}>
             With the blessings of Allah Subhanahu Wa Ta'ala and through
@@ -140,38 +143,39 @@ export default function RaabtaTemplate({
           <p className="font-sans text-sm opacity-45" style={{ color: tc.text }}>
             Of your gracious presence at the Nikah ceremony of
           </p>
-          <p className="mt-3 font-display text-2xl font-bold" style={{ color: tc.primary }}>
+          <p className="mt-3 font-display text-2xl font-bold md:text-3xl" style={{ color: tc.primary }}>
             {inv.groomName} <span className="opacity-30">&</span> {inv.brideName}
           </p>
           {inv.groomFamily && (
-            <p className="mt-4 font-sans text-xs opacity-40" style={{ color: tc.text }}>
+            <p className="mt-4 font-sans text-xs opacity-40 md:text-sm" style={{ color: tc.text }}>
               Son of {inv.groomFamily}
             </p>
           )}
           {inv.brideFamily && (
-            <p className="mt-1 font-sans text-xs opacity-40" style={{ color: tc.text }}>
+            <p className="mt-1 font-sans text-xs opacity-40 md:text-sm" style={{ color: tc.text }}>
               Daughter of {inv.brideFamily}
             </p>
           )}
+          </div>
         </div>
       </SectionReveal>
 
       <GeometricDivider color={tc.secondary} bgColor={tc.bg} />
 
       {/* Events */}
-      <div className="px-5 py-12" style={{ background: tc.bg }}>
+      <div className="px-6 py-14 md:px-12 md:py-20 lg:px-16 lg:py-28" style={{ background: tc.bg }}>
         <SectionReveal>
           <h2
-            className="mb-1 text-center font-heading text-xl font-semibold tracking-[2px]"
+            className="mb-1 text-center font-heading text-xl font-semibold tracking-[2px] md:text-3xl lg:text-4xl"
             style={{ color: tc.primary }}
           >
             Celebrations
           </h2>
-          <p className="mb-8 text-center font-sans text-sm opacity-40" style={{ color: tc.text }}>
+          <p className="mb-8 text-center font-sans text-sm opacity-40 md:text-base" style={{ color: tc.text }}>
             Blessed moments of togetherness
           </p>
         </SectionReveal>
-        <div className="space-y-3">
+        <div className="mx-auto max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
           {events.map((ev, i) => (
             <SectionReveal key={ev.id} animation="fadeUp" delay={i * 100}>
               <div
@@ -239,19 +243,21 @@ export default function RaabtaTemplate({
       {/* Message */}
       {inv.message && (
         <SectionReveal>
-          <div className="px-8 py-14 text-center" style={{ background: tc.card }}>
-            <p
-              className="mb-4 font-sans text-[10px] font-semibold uppercase tracking-[4px]"
-              style={{ color: tc.secondary }}
-            >
-              A Message from the Couple
-            </p>
-            <p
-              className="mx-auto max-w-sm text-base italic leading-[2] opacity-50"
-              style={{ color: tc.text }}
-            >
-              {inv.message}
-            </p>
+          <div className="px-6 py-14 text-center md:px-12 md:py-20 lg:px-16 lg:py-28" style={{ background: tc.card }}>
+            <div className="mx-auto max-w-3xl">
+              <p
+                className="mb-4 font-sans text-[10px] font-semibold uppercase tracking-[4px] md:text-xs"
+                style={{ color: tc.secondary }}
+              >
+                A Message from the Couple
+              </p>
+              <p
+                className="mx-auto max-w-xl text-base italic leading-[2] opacity-50 md:text-lg"
+                style={{ color: tc.text }}
+              >
+                {inv.message}
+              </p>
+            </div>
           </div>
         </SectionReveal>
       )}
@@ -260,14 +266,14 @@ export default function RaabtaTemplate({
 
       {/* Gallery */}
       <SectionReveal>
-        <div className="px-5 py-12" style={{ background: tc.bg }}>
+        <div className="px-6 py-14 md:px-12 md:py-20 lg:px-16 lg:py-28" style={{ background: tc.bg }}>
           <h2
-            className="mb-6 text-center font-heading text-xl font-semibold tracking-[2px]"
+            className="mb-6 text-center font-heading text-xl font-semibold tracking-[2px] md:text-3xl lg:text-4xl"
             style={{ color: tc.primary }}
           >
             Our Moments
           </h2>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="mx-auto max-w-4xl grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
             {["\uD83D\uDCF8", "\uD83D\uDC95", "\u2728", "\uD83C\uDF05"].map((e, i) => (
               <div
                 key={i}
@@ -286,9 +292,10 @@ export default function RaabtaTemplate({
 
       {/* Things to Know */}
       <SectionReveal>
-        <div className="px-5 py-12" style={{ background: tc.card }}>
+        <div className="px-6 py-14 md:px-12 md:py-20 lg:px-16 lg:py-28" style={{ background: tc.card }}>
+          <div className="mx-auto max-w-3xl">
           <h2
-            className="mb-6 text-center font-heading text-xl font-semibold tracking-[2px]"
+            className="mb-6 text-center font-heading text-xl font-semibold tracking-[2px] md:text-3xl lg:text-4xl"
             style={{ color: tc.primary }}
           >
             Things to Know
@@ -315,41 +322,44 @@ export default function RaabtaTemplate({
               </div>
             </div>
           ))}
+          </div>
         </div>
       </SectionReveal>
 
       {/* RSVP */}
       <SectionReveal>
-        <div className="px-6 py-12 text-center" style={{ background: tc.bg }}>
-          <div className="mb-3 text-4xl">💌</div>
-          <h2
-            className="mb-2 font-heading text-xl font-semibold tracking-[2px]"
-            style={{ color: tc.primary }}
-          >
-            RSVP
-          </h2>
-          <p className="mb-6 font-sans text-xs opacity-40" style={{ color: tc.text }}>
-            Kindly honour us with your response
-          </p>
-          <button
-            className="w-full rounded-xl py-3.5 font-sans text-sm font-semibold uppercase tracking-[2px] text-white shadow-gold"
-            style={{ background: tc.primary }}
-          >
-            \uD83D\uDCAC RSVP on WhatsApp
-          </button>
+        <div className="px-6 py-14 text-center md:px-12 md:py-20 lg:px-16 lg:py-28" style={{ background: tc.bg }}>
+          <div className="mx-auto max-w-xl">
+            <div className="mb-3 text-4xl">💌</div>
+            <h2
+              className="mb-2 font-heading text-xl font-semibold tracking-[2px] md:text-3xl"
+              style={{ color: tc.primary }}
+            >
+              RSVP
+            </h2>
+            <p className="mb-6 font-sans text-xs opacity-40 md:text-sm" style={{ color: tc.text }}>
+              Kindly honour us with your response
+            </p>
+            <button
+              className="w-full rounded-xl py-3.5 font-sans text-sm font-semibold uppercase tracking-[2px] text-white shadow-gold md:py-4 md:text-base"
+              style={{ background: tc.primary }}
+            >
+              \uD83D\uDCAC RSVP on WhatsApp
+            </button>
+          </div>
         </div>
       </SectionReveal>
 
       {/* Countdown */}
       <SectionReveal>
-        <div className="px-6 py-12 text-center" style={{ background: tc.card }}>
+        <div className="px-6 py-14 text-center md:px-12 md:py-20 lg:px-16 lg:py-28" style={{ background: tc.card }}>
           <h2
-            className="mb-6 font-heading text-xl font-semibold tracking-[2px]"
+            className="mb-6 font-heading text-xl font-semibold tracking-[2px] md:text-3xl lg:text-4xl"
             style={{ color: tc.primary }}
           >
             The Countdown Begins
           </h2>
-          <div className="flex justify-center gap-3">
+          <div className="flex justify-center gap-3 md:gap-5 lg:gap-6">
             {[
               { v: cd.d, l: "Days" },
               { v: cd.h, l: "Hours" },
@@ -358,7 +368,7 @@ export default function RaabtaTemplate({
             ].map((u, i) => (
               <div key={i} className="text-center">
                 <div
-                  className="flex h-16 w-16 items-center justify-center font-heading text-2xl font-bold"
+                  className="flex h-16 w-16 items-center justify-center font-heading text-2xl font-bold md:h-20 md:w-20 md:text-3xl lg:h-24 lg:w-24 lg:text-4xl"
                   style={{
                     background: tc.primary + "0A",
                     color: tc.primary,
@@ -394,7 +404,7 @@ export default function RaabtaTemplate({
         />
         <div className="relative z-10">
           <CrescentStar color={tc.secondary + "60"} />
-          <div className="mb-2 mt-4 font-script text-3xl text-white drop-shadow-lg">
+          <div className="mb-2 mt-4 font-script text-3xl text-white drop-shadow-lg md:text-4xl">
             {inv.groomName} & {inv.brideName}
           </div>
           <p className="text-xs text-white opacity-30">
