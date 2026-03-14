@@ -1,5 +1,5 @@
 import { db } from "./drizzle";
-import { templates, creditPackages } from "./schema";
+import { templates, creditPackages, plans, ads } from "./schema";
 import { DEFAULT_CREDIT_PACKAGES } from "./credits";
 
 async function seed() {
@@ -267,6 +267,42 @@ async function seed() {
     await db.insert(creditPackages).values(pkg).onConflictDoNothing();
   }
   console.log(`  ✅ ${DEFAULT_CREDIT_PACKAGES.length} credit packages seeded`);
+
+  // Seed plans
+  await db.insert(plans).values([
+    {
+      id: "free", name: "Free", price: 0, showAds: true, credits: 3,
+      maxPublished: 1, maxEvents: 2, maxPhotos: 3, sortOrder: 0,
+      features: ["2 Free Templates", "1 Published Invitation", "Up to 2 Events", "Basic Photo Gallery", "RSVP via WhatsApp", "Invitara Branding", "Ads Shown", "3 AI Credits"],
+    },
+    {
+      id: "starter", name: "Starter", price: 2999, showAds: false, credits: 5,
+      maxPublished: 3, maxEvents: 5, maxPhotos: 8, sortOrder: 1,
+      features: ["Purchase Templates Individually", "Up to 3 Published Invitations", "Up to 5 Events", "Photo Gallery (8 photos)", "RSVP Dashboard", "No Ads", "Remove Branding", "5 Bonus AI Credits"],
+    },
+    {
+      id: "premium", name: "Premium", price: 3999, showAds: false, credits: 15,
+      maxPublished: 10, maxEvents: 0, maxPhotos: 20, badge: "Most Popular", sortOrder: 2,
+      features: ["ALL Templates Included", "Up to 10 Published Invitations", "Unlimited Events", "Photo Gallery (20 photos)", "RSVP Dashboard + Analytics", "No Ads", "Custom Domain", "Background Music", "15 Bonus AI Credits", "Priority Support"],
+    },
+    {
+      id: "royal", name: "Royal", price: 6999, showAds: false, credits: 50,
+      maxPublished: 0, maxEvents: 0, maxPhotos: 50, sortOrder: 3,
+      features: ["Everything in Premium", "Unlimited Published Invitations", "Custom Design Tweaks", "Video Background", "Multi-language Support", "Guest Management CRM", "QR Code Invites", "50 Bonus AI Credits", "Concierge Setup", "Dedicated Manager"],
+    },
+  ]).onConflictDoNothing();
+  console.log("  ✅ 4 plans seeded");
+
+  // Seed ads
+  await db.insert(ads).values([
+    { id: "upgrade-premium", slot: "hero_banner", title: "Go Premium", description: "Remove ads, unlock all templates, get AI design credits & custom domain.", ctaText: "Upgrade Now", ctaLink: "/pricing", gradient: "linear-gradient(135deg, #A67C2E 0%, #D4A853 50%, #FFD466 100%)", icon: "", priority: 10 },
+    { id: "ai-credits", slot: "editor_bottom", title: "AI-Powered Designs", description: "Let AI generate unique color palettes and design suggestions for your invite.", ctaText: "Try AI Design", ctaLink: "/ai-generate", gradient: "linear-gradient(135deg, #4A3A6B 0%, #7A6AAB 50%, #D4A853 100%)", icon: "", priority: 8 },
+    { id: "credit-sale", slot: "dashboard_top", title: "Credit Sale!", description: "Get 15 AI generation credits for just \u20B9249.", ctaText: "Buy Credits", ctaLink: "/account", gradient: "linear-gradient(135deg, #C73866 0%, #E8668E 50%, #D4A853 100%)", icon: "", priority: 7 },
+    { id: "share-invite", slot: "preview_footer", title: "Love your invite?", description: "Share Invitara with friends & earn 2 free AI credits per referral!", ctaText: "Share & Earn", ctaLink: "/account", gradient: "linear-gradient(135deg, #1A4A3A 0%, #2A7A5A 50%, #D4A853 100%)", icon: "", priority: 5 },
+    { id: "template-new", slot: "template_sidebar", title: "New: Cherry Blossom", description: "Our newest template — golden cherry blossoms for spring weddings.", ctaText: "Preview Template", ctaLink: "/templates", gradient: "linear-gradient(135deg, #E8668E 0%, #FF99B5 50%, #D4A853 100%)", icon: "", priority: 6 },
+    { id: "between-events-upgrade", slot: "between_events", title: "Remove this ad", description: "Upgrade to Premium for an ad-free experience.", ctaText: "Go Ad-Free", ctaLink: "/pricing", gradient: "linear-gradient(135deg, #D4A853 0%, #FFE49A 100%)", icon: "", priority: 3 },
+  ]).onConflictDoNothing();
+  console.log("  ✅ 6 ads seeded");
 
   console.log("✨ Seed complete!");
   process.exit(0);
