@@ -42,6 +42,7 @@ interface InviteClientProps {
   };
   events: any[];
   template: Template | null;
+  showAds?: boolean;
 }
 
 const FALLBACK_TEMPLATE: Template = {
@@ -74,11 +75,15 @@ export function InviteNotFound() {
   );
 }
 
-export function InviteClient({ invitation, events, template }: InviteClientProps) {
+export function InviteClient({ invitation, events, template, showAds = true }: InviteClientProps) {
   const activeTmpl = template ?? FALLBACK_TEMPLATE;
   const tc = activeTmpl.colors;
 
-  const { data: adData } = useQuery(adQueryOptions("preview_footer"));
+  // Only fetch ads if the invitation owner is on a free/ad-showing plan
+  const { data: adData } = useQuery({
+    ...adQueryOptions("preview_footer"),
+    enabled: showAds,
+  });
 
   const invData = {
     groomName: invitation.groomName ?? "",
@@ -155,8 +160,8 @@ export function InviteClient({ invitation, events, template }: InviteClientProps
         </div>
       </div>
 
-      {/* Ad Banner — integrated into template design */}
-      {adData && (
+      {/* Ad Banner — only shown if invitation owner is on free plan */}
+      {showAds && adData && (
         <div
           className="py-10 md:py-14"
           style={{ background: tc.bg }}

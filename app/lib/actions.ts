@@ -548,7 +548,13 @@ export async function getInvitationBySlug(data: { slug: string }) {
     .where(eq(events.invitationId, inv.id))
     .orderBy(events.sortOrder);
   const [tmpl] = await db.select().from(templates).where(eq(templates.id, inv.templateId)).limit(1);
-  return { invitation: inv, events: evs, template: tmpl ?? null };
+  // Check if invitation owner is on a free/ad-showing plan
+  const [owner] = await db
+    .select({ showAds: users.showAds })
+    .from(users)
+    .where(eq(users.id, inv.userId))
+    .limit(1);
+  return { invitation: inv, events: evs, template: tmpl ?? null, showAds: owner?.showAds ?? true };
 }
 
 // ━━━ RSVP SUBMISSION (guest-facing) ━━━
