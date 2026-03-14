@@ -19,6 +19,9 @@ export function Navigation() {
   const logout = useLogout();
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  // Hide nav on public invite pages and admin pages (they have their own layout)
+  if (pathname.startsWith("/invite/") || pathname.startsWith("/admin")) return null;
+
   const handleLogout = () => {
     logout.mutate(undefined, {
       onSuccess: () => router.push("/"),
