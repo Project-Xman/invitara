@@ -1,6 +1,6 @@
 import { db } from "./drizzle";
-import { users, templates, templatePurchases, payments } from "./schema";
-import { eq, and, inArray } from "drizzle-orm";
+import { users, templates, templatePurchases, payments, invitations } from "./schema";
+import { eq, and } from "drizzle-orm";
 
 // ━━━ CHECK IF USER OWNS TEMPLATE ━━━
 export async function userOwnsTemplate(userId: string, templateId: string): Promise<boolean> {
@@ -123,6 +123,34 @@ export async function upgradePlan(
   return { plan, bonusCredits: planCredits[plan] };
 }
 
+// ━━━ PLAN LIMITS ━━━
+export const PLAN_LIMITS = {
+  free: { maxPublished: 1, maxEvents: 2, maxPhotos: 3 },
+  starter: { maxPublished: 3, maxEvents: 5, maxPhotos: 8 },
+  premium: { maxPublished: 10, maxEvents: Infinity, maxPhotos: 20 },
+  royal: { maxPublished: Infinity, maxEvents: Infinity, maxPhotos: 50 },
+} as const;
+
+export type PlanId = keyof typeof PLAN_LIMITS;
+
+// ━━━ CHECK PUBLISH LIMIT ━━━
+export async function canPublish(userId: string): Promise<{ allowed: boolean; current: number; max: number }> {
+  const [user] = await db.select({ plan: users.plan }).from(users).where(eq(users.id, userId));
+  if (!user) return { allowed: false, current: 0, max: 0 };
+
+  const plan = user.plan as PlanId;
+  const max = PLAN_LIMITS[plan].maxPublished;
+
+  if (max === Infinity) return { allowed: true, current: 0, max };
+
+  const published = await db
+    .select({ id: invitations.id })
+    .from(invitations)
+    .where(and(eq(invitations.userId, userId), eq(invitations.published, true)));
+
+  return { allowed: published.length < max, current: published.length, max };
+}
+
 // ━━━ PRICING PLANS ━━━
 export const PLANS = [
   {
@@ -131,8 +159,10 @@ export const PLANS = [
     price: 0,
     showAds: true,
     credits: 3,
+    maxPublished: PLAN_LIMITS.free.maxPublished,
     features: [
       "2 Free Templates",
+      `${PLAN_LIMITS.free.maxPublished} Published Invitation`,
       "Up to 2 Events",
       "Basic Photo Gallery",
       "RSVP via WhatsApp",
@@ -147,8 +177,10 @@ export const PLANS = [
     price: 2999,
     showAds: false,
     credits: 5,
+    maxPublished: PLAN_LIMITS.starter.maxPublished,
     features: [
       "Purchase Templates Individually",
+      `Up to ${PLAN_LIMITS.starter.maxPublished} Published Invitations`,
       "Up to 5 Events",
       "Photo Gallery (8 photos)",
       "RSVP Dashboard",
@@ -164,8 +196,10 @@ export const PLANS = [
     showAds: false,
     credits: 15,
     badge: "Most Popular",
+    maxPublished: PLAN_LIMITS.premium.maxPublished,
     features: [
       "ALL Templates Included",
+      `Up to ${PLAN_LIMITS.premium.maxPublished} Published Invitations`,
       "Unlimited Events",
       "Photo Gallery (20 photos)",
       "RSVP Dashboard + Analytics",
@@ -182,8 +216,10 @@ export const PLANS = [
     price: 6999,
     showAds: false,
     credits: 50,
+    maxPublished: Infinity,
     features: [
       "Everything in Premium",
+      "Unlimited Published Invitations",
       "Custom Design Tweaks",
       "Video Background",
       "Multi-language Support",

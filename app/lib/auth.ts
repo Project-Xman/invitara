@@ -1,3 +1,4 @@
+import { isSuperAdmin } from "./admin";
 import { db } from "./drizzle";
 import { users, sessions } from "./schema";
 import { eq, and, gt, lt } from "drizzle-orm";
@@ -222,6 +223,7 @@ export type SafeUser = {
   plan: "free" | "starter" | "premium" | "royal";
   credits: number;
   showAds: boolean;
+  isAdmin: boolean;
   createdAt: Date;
 };
 
@@ -235,6 +237,7 @@ export function toSafeUser(user: typeof users.$inferSelect): SafeUser {
     plan: user.plan,
     credits: user.credits,
     showAds: user.showAds,
+    isAdmin: isSuperAdmin(user.email),
     createdAt: user.createdAt,
   };
 }

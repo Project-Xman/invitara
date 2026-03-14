@@ -33,6 +33,9 @@ export const env = {
   // Cron (optional)
   CRON_SECRET: process.env.CRON_SECRET ?? "",
 
+  // Admin
+  SUPERADMIN_EMAILS: process.env.SUPERADMIN_EMAILS ?? "",
+
   isDev: process.env.NODE_ENV !== "production",
   isProd: process.env.NODE_ENV === "production",
 } as const;

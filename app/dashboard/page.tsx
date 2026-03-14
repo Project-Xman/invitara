@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   sessionQueryOptions,
   myInvitationsQueryOptions,
@@ -17,6 +17,23 @@ import dynamic from "next/dynamic";
 import { RsvpTable } from "~/components/RsvpTable";
 import { ShareModal } from "~/components/ShareModal";
 import { AdBanner } from "~/components/AdBanner";
+import {
+  Share2,
+  Pencil,
+  Eye,
+  EyeOff,
+  Trash2,
+  Loader2,
+  Users,
+  CheckCircle2,
+  Clock,
+  XCircle,
+  Inbox,
+  Send,
+  BarChart3,
+  Calendar,
+  AlertTriangle,
+} from "lucide-react";
 
 const AnalyticsChart = dynamic(
   () => import("~/components/AnalyticsChart").then((m) => ({ default: m.AnalyticsChart })),
@@ -35,7 +52,6 @@ export default function DashboardPage() {
   const deleteInv = useDeleteInvitation();
   const unpublishInv = useUnpublishInvitation();
 
-  // Use the first invitation by default once list loads
   const activeInvId = selectedInvId ?? (myInvitations[0] as any)?.id;
   const activeInv =
     (myInvitations as any[]).find((i) => i.id === activeInvId) ?? (myInvitations as any[])[0];
@@ -55,9 +71,13 @@ export default function DashboardPage() {
     enabled: !!activeInvId,
   });
 
-  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!user && !invLoading) {
+      router.push("/auth/login");
+    }
+  }, [user, invLoading, router]);
+
   if (!user && !invLoading) {
-    router.push("/auth/login");
     return null;
   }
 
@@ -67,7 +87,6 @@ export default function DashboardPage() {
   const declined = rsvpList.filter((r) => r.status === "declined");
   const totalGuests = attending.reduce((s: number, r: any) => s + (r.guests ?? 1), 0);
 
-  // Build event breakdown from real events + RSVP attendance data
   const eventBreakdown = (events as any[]).map((ev) => {
     const attendingRsvps = rsvpList.filter(
       (r) =>
@@ -85,7 +104,6 @@ export default function DashboardPage() {
     };
   });
 
-  // Build analytics chart format
   const analyticsChartData = analyticsData
     ? {
         summary: analyticsData.summary as Record<string, number>,
@@ -102,22 +120,23 @@ export default function DashboardPage() {
   if (invLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center pt-[68px]">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-gold-300 border-t-gold-700" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
-  // Empty state — no invitations yet
   if (myInvitations.length === 0) {
     return (
       <div className="flex min-h-screen animate-fade-up flex-col items-center justify-center gap-4 px-6 pt-[68px]">
-        <div className="mb-2 text-5xl">💌</div>
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
+          <Inbox className="h-8 w-8 text-primary" />
+        </div>
         <h1 className="text-center font-display text-3xl font-bold">No Invitations Yet</h1>
-        <p className="max-w-sm text-center text-sm opacity-45">
+        <p className="max-w-sm text-center text-sm text-muted-foreground">
           Create your first wedding invitation to see RSVPs, analytics, and guest management here.
         </p>
         <Link href="/templates" className="btn-gold mt-2 !px-8 !py-3">
-          Browse Templates →
+          Browse Templates
         </Link>
       </div>
     );
@@ -128,15 +147,13 @@ export default function DashboardPage() {
       <div className="mx-auto max-w-[1320px] px-6 py-12 lg:px-8">
         {/* Header */}
         <div className="mb-8 text-center">
-          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[3px] text-gold-600/70">
-            Dashboard
-          </p>
-          <h1 className="mb-2 font-display text-3xl font-bold md:text-4xl">
+          <p className="section-label mb-2">Dashboard</p>
+          <h1 className="mb-2 section-heading !text-3xl md:!text-4xl">
             Manage Your Invitation
           </h1>
         </div>
 
-        {/* Invitation selector (shown when user has more than one) */}
+        {/* Invitation selector */}
         {(myInvitations as any[]).length > 1 && (
           <div className="mb-6 flex justify-center">
             <select
@@ -153,7 +170,7 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* Ad for free users */}
+        {/* Ad */}
         {(!user || user?.showAds) && (
           <AdBanner
             user={user ?? null}
@@ -161,11 +178,11 @@ export default function DashboardPage() {
             ad={{
               id: "credit-sale",
               title: "Credit Sale!",
-              description: "Get 15 AI generation credits for just ₹249.",
-              ctaText: "Buy Credits →",
+              description: "Get 15 AI generation credits for just \u20B9249.",
+              ctaText: "Buy Credits",
               ctaLink: "/account",
               gradient: "linear-gradient(135deg,#C73866,#E8668E,#D4A853)",
-              icon: "🎁",
+              icon: "",
             }}
           />
         )}
@@ -176,7 +193,7 @@ export default function DashboardPage() {
             className="btn-gold !px-6 !py-2.5 !text-[10px]"
             onClick={() => setShowShare(true)}
           >
-            ✨ Share Invite
+            <Share2 className="h-3.5 w-3.5" /> Share Invite
           </button>
           {activeInvId && (
             <>
@@ -184,13 +201,13 @@ export default function DashboardPage() {
                 href={`/editor?invitation=${activeInvId}`}
                 className="btn-gold-outline !px-6 !py-2.5 !text-[10px]"
               >
-                Edit Invite
+                <Pencil className="h-3.5 w-3.5" /> Edit
               </Link>
               <Link
                 href={`/preview?invitation=${activeInvId}`}
                 className="btn-gold-outline !px-6 !py-2.5 !text-[10px]"
               >
-                Preview
+                <Eye className="h-3.5 w-3.5" /> Preview
               </Link>
               {activeInv?.published && (
                 <button
@@ -198,48 +215,53 @@ export default function DashboardPage() {
                   onClick={() => unpublishInv.mutate(activeInvId)}
                   disabled={unpublishInv.isPending}
                 >
-                  {unpublishInv.isPending ? "Unpublishing…" : "Unpublish"}
+                  <EyeOff className="h-3.5 w-3.5" />
+                  {unpublishInv.isPending ? "Unpublishing..." : "Unpublish"}
                 </button>
               )}
               <button
-                className="rounded-full border border-red-300/50 bg-white px-6 py-2.5 text-[10px] font-semibold uppercase tracking-[1px] text-red-500 transition-colors hover:bg-red-50"
+                className="flex items-center gap-2 rounded-full border border-destructive/30 bg-card px-6 py-2.5 text-[10px] font-semibold uppercase tracking-[1px] text-destructive transition-colors hover:bg-destructive/10"
                 onClick={() => setConfirmDelete(activeInvId)}
               >
-                Delete
+                <Trash2 className="h-3.5 w-3.5" /> Delete
               </button>
             </>
           )}
         </div>
 
-        {/* Delete confirmation modal */}
+        {/* Delete confirmation */}
         {confirmDelete && (
           <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 p-6">
-            <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl">
-              <h3 className="mb-2 font-display text-xl font-bold">Delete Invitation?</h3>
-              <p className="mb-6 text-sm opacity-60">
+            <div className="w-full max-w-sm rounded-2xl bg-card p-6 shadow-xl">
+              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-destructive/10">
+                <AlertTriangle className="h-6 w-6 text-destructive" />
+              </div>
+              <h3 className="mb-2 text-center font-display text-xl font-bold">Delete Invitation?</h3>
+              <p className="mb-6 text-center text-sm text-muted-foreground">
                 This will permanently delete the invitation and all its events, RSVPs, and
                 analytics. This action cannot be undone.
               </p>
               <div className="flex gap-3">
                 <button
-                  className="flex-1 rounded-full border border-red-300 bg-red-50 py-2.5 text-[10px] font-bold uppercase tracking-[1px] text-red-600 hover:bg-red-100"
+                  className="flex flex-1 items-center justify-center gap-2 rounded-full border border-destructive/30 bg-destructive/10 py-2.5 text-[10px] font-bold uppercase tracking-[1px] text-destructive hover:bg-destructive/20"
                   onClick={() => {
-                    deleteInv.mutate(
-                      confirmDelete,
-                      {
-                        onSuccess: () => {
-                          setConfirmDelete(null);
-                          setSelectedInvId(undefined);
-                        },
-                      }
-                    );
+                    deleteInv.mutate(confirmDelete, {
+                      onSuccess: () => {
+                        setConfirmDelete(null);
+                        setSelectedInvId(undefined);
+                      },
+                    });
                   }}
                   disabled={deleteInv.isPending}
                 >
-                  {deleteInv.isPending ? "Deleting…" : "Yes, Delete"}
+                  {deleteInv.isPending ? (
+                    <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Deleting...</>
+                  ) : (
+                    <><Trash2 className="h-3.5 w-3.5" /> Yes, Delete</>
+                  )}
                 </button>
                 <button
-                  className="flex-1 rounded-full border border-gold-200/30 bg-cream-50 py-2.5 text-[10px] font-bold uppercase tracking-[1px]"
+                  className="flex-1 rounded-full border border-border bg-accent py-2.5 text-[10px] font-bold uppercase tracking-[1px]"
                   onClick={() => setConfirmDelete(null)}
                 >
                   Cancel
@@ -252,31 +274,31 @@ export default function DashboardPage() {
         {/* Stats */}
         <div className="mb-10 grid grid-cols-2 gap-4 lg:grid-cols-4">
           {[
-            { l: "Total RSVPs", v: rsvpList.length, s: "responses", c: "text-gold-700" },
-            {
-              l: "Attending",
-              v: attending.length,
-              s: `${totalGuests} guests total`,
-              c: "text-emerald-600",
-            },
-            { l: "Pending", v: pending.length, s: "awaiting response", c: "text-amber-600" },
-            { l: "Declined", v: declined.length, s: "won't make it", c: "text-red-500" },
+            { l: "Total RSVPs", v: rsvpList.length, s: "responses", icon: <Users className="h-5 w-5" />, c: "text-primary" },
+            { l: "Attending", v: attending.length, s: `${totalGuests} guests total`, icon: <CheckCircle2 className="h-5 w-5" />, c: "text-emerald-600" },
+            { l: "Pending", v: pending.length, s: "awaiting response", icon: <Clock className="h-5 w-5" />, c: "text-amber-600" },
+            { l: "Declined", v: declined.length, s: "won't make it", icon: <XCircle className="h-5 w-5" />, c: "text-red-500" },
           ].map((s, i) => (
-            <div key={i} className="border-gold-200/12 rounded-2xl border bg-white p-5 shadow-card">
-              <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-[2px] opacity-35">
-                {s.l}
-              </p>
+            <div key={i} className="rounded-2xl border border-border bg-card p-5 shadow-card">
+              <div className="mb-2 flex items-center justify-between">
+                <p className="text-[10px] font-semibold uppercase tracking-[2px] text-muted-foreground">
+                  {s.l}
+                </p>
+                <div className={`${s.c} opacity-40`}>{s.icon}</div>
+              </div>
               <p className={`font-display text-4xl font-bold ${s.c}`}>{s.v}</p>
-              <p className="mt-1 text-xs opacity-35">{s.s}</p>
+              <p className="mt-1 text-xs text-muted-foreground">{s.s}</p>
             </div>
           ))}
         </div>
 
-        {/* Analytics Chart */}
+        {/* Analytics */}
         <div className="mb-10">
-          <h2 className="mb-5 font-display text-xl font-bold">Analytics</h2>
+          <h2 className="mb-5 flex items-center gap-2 font-display text-xl font-bold">
+            <BarChart3 className="h-5 w-5 text-primary" /> Analytics
+          </h2>
           {analyticsLoading ? (
-            <div className="h-48 animate-pulse rounded-2xl bg-cream-100/60" />
+            <div className="h-48 animate-pulse rounded-2xl bg-accent" />
           ) : (
             <AnalyticsChart daily={analyticsChartData.daily} summary={analyticsChartData.summary} />
           )}
@@ -285,23 +307,25 @@ export default function DashboardPage() {
         {/* Event Breakdown */}
         {eventBreakdown.length > 0 && (
           <div className="mb-10">
-            <h2 className="mb-5 font-display text-xl font-bold">Event Breakdown</h2>
+            <h2 className="mb-5 flex items-center gap-2 font-display text-xl font-bold">
+              <Calendar className="h-5 w-5 text-primary" /> Event Breakdown
+            </h2>
             <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
               {eventBreakdown.map((ev) => (
                 <div
                   key={ev.name}
-                  className="rounded-xl border border-l-4 border-gold-200/10 bg-white p-4"
+                  className="rounded-xl border border-l-4 border-border bg-card p-4"
                   style={{ borderLeftColor: ev.color }}
                 >
                   <div className="mb-2 text-2xl">{ev.icon}</div>
-                  <p className="mb-0.5 text-[10px] font-semibold uppercase tracking-[1.5px] opacity-40">
+                  <p className="mb-0.5 text-[10px] font-semibold uppercase tracking-[1.5px] text-muted-foreground">
                     {ev.name}
                   </p>
                   <p className="font-display text-2xl font-bold" style={{ color: ev.color }}>
                     {ev.guests}
                   </p>
-                  <p className="text-[11px] opacity-35">
-                    {ev.families} families · {ev.date}
+                  <p className="text-[11px] text-muted-foreground">
+                    {ev.families} families {'\u00B7'} {ev.date}
                   </p>
                 </div>
               ))}
@@ -309,23 +333,27 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* Guest Responses Table */}
+        {/* Guest Responses */}
         <div>
-          <h2 className="mb-5 font-display text-xl font-bold">Guest Responses</h2>
+          <h2 className="mb-5 flex items-center gap-2 font-display text-xl font-bold">
+            <Users className="h-5 w-5 text-primary" /> Guest Responses
+          </h2>
           {rsvpLoading ? (
-            <div className="h-48 animate-pulse rounded-2xl bg-cream-100/60" />
+            <div className="h-48 animate-pulse rounded-2xl bg-accent" />
           ) : rsvpList.length === 0 ? (
-            <div className="rounded-2xl border border-gold-200/15 bg-white py-16 text-center">
-              <div className="mb-3 text-4xl">📬</div>
+            <div className="rounded-2xl border border-border bg-card py-16 text-center">
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10">
+                <Inbox className="h-7 w-7 text-primary" />
+              </div>
               <p className="mb-1 font-display text-lg font-semibold">No RSVPs yet</p>
-              <p className="text-sm opacity-40">
+              <p className="text-sm text-muted-foreground">
                 Share your invitation link to start receiving responses.
               </p>
               <button
                 className="btn-gold mt-4 !px-6 !py-2.5 !text-[10px]"
                 onClick={() => setShowShare(true)}
               >
-                Share Now →
+                <Send className="h-3.5 w-3.5" /> Share Now
               </button>
             </div>
           ) : (

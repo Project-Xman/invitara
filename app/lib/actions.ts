@@ -40,6 +40,7 @@ import {
   userOwnsTemplate,
   purchaseTemplate,
   upgradePlan,
+  canPublish,
   PLANS,
 } from "./purchases";
 import { getAdForSlot, trackAdImpression, trackAdClick, shouldShowAds, type AdSlot } from "./ads";
@@ -277,10 +278,33 @@ export async function publishInvitation(data: { id: string }): Promise<{ slug: s
   if (!user) throw new Error("Not authenticated");
 
   const [inv] = await db
-    .select({ userId: invitations.userId, slug: invitations.slug })
+    .select({
+      userId: invitations.userId,
+      slug: invitations.slug,
+      templateId: invitations.templateId,
+      published: invitations.published,
+    })
     .from(invitations)
     .where(eq(invitations.id, data.id));
   if (!inv || inv.userId !== user.id) throw new Error("Forbidden");
+
+  // Check template ownership — paid templates require purchase or premium/royal plan
+  const ownsTemplate = await userOwnsTemplate(user.id, inv.templateId);
+  if (!ownsTemplate) {
+    throw new Error(
+      "You don't have access to this template. Purchase it individually or upgrade your plan."
+    );
+  }
+
+  // Check publish limit — only if not already published (re-publish is free)
+  if (!inv.published) {
+    const publishCheck = await canPublish(user.id);
+    if (!publishCheck.allowed) {
+      throw new Error(
+        `You've reached your plan's limit of ${publishCheck.max} published invitation${publishCheck.max === 1 ? "" : "s"}. Upgrade your plan to publish more.`
+      );
+    }
+  }
 
   await db
     .update(invitations)

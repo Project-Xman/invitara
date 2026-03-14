@@ -63,3 +63,7 @@ node_modules
 
 # Drizzle
 drizzle/migrations
+
+# Dolt database files (added by bd init)
+.dolt/
+*.db

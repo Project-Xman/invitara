@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import React from "react";
 import "./globals.css";
 import { Providers } from "./providers";
 import { Navigation } from "./components/Navigation";
@@ -52,7 +53,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html
       lang="en"
       className={cn(
-        "font-sans",
+        "font-sans theme-yellow",
         inter.variable,
         playfair.variable,
         cormorant.variable,
@@ -65,7 +66,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </head>
-      <body className="bg-cream-100 font-sans text-cream-900 antialiased">
+      <body className="bg-background font-sans text-foreground antialiased min-h-screen selection:bg-primary/20">
         <Providers>
           <Navigation />
           {children}
