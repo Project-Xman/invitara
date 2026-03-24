@@ -20,7 +20,7 @@ export function Navigation() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   // Hide nav on public invite pages and admin pages (they have their own layout)
-  if (pathname.startsWith("/invite/") || pathname.startsWith("/admin")) return null;
+  if (pathname.startsWith("/invite/") || pathname.startsWith("/admin") || pathname.startsWith("/studio")) return null;
 
   const handleLogout = () => {
     logout.mutate(undefined, {

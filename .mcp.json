@@ -3,6 +3,13 @@
     "excalidraw": {
       "type": "url",
       "url": "https://mcp.excalidraw.com/sse"
+    },
+    "shadcn": {
+      "command": "npx",
+      "args": [
+        "shadcn@latest",
+        "mcp"
+      ]
     }
   }
 }
