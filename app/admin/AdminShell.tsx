@@ -17,6 +17,7 @@ import {
   Menu,
   X,
   Sparkles,
+  Layers,
 } from "lucide-react";
 
 const NAV_ITEMS: readonly { href: string; icon: typeof BarChart3; label: string; exact?: boolean }[] = [
@@ -102,6 +103,15 @@ export function AdminShell({
 
       {/* Bottom user area */}
       <div className="border-t border-background/10 px-4 py-4">
+        {/* Webstudio link */}
+        <Link
+          href="/studio"
+          onClick={() => setMobileOpen(false)}
+          className="mb-2 flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-background/70 transition-colors hover:bg-background/5 hover:text-background"
+        >
+          <Layers className="h-4 w-4" />
+          Design Studio
+        </Link>
         <div className="mb-3 truncate px-2 text-sm text-background/60">
           {user.name}
         </div>

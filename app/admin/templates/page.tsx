@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import * as Dialog from "@radix-ui/react-dialog";
+import Link from "next/link";
 import {
   Plus,
   Pencil,
@@ -12,6 +13,7 @@ import {
   ToggleRight,
   Sparkles,
   Gift,
+  Layers,
 } from "lucide-react";
 
 import {
@@ -516,6 +518,13 @@ export default function AdminTemplatesPage() {
                   <Pencil className="w-3.5 h-3.5" />
                   Edit
                 </button>
+                <Link
+                  href={`/studio?templateId=${encodeURIComponent(template.id)}`}
+                  className="btn-gold-outline flex items-center justify-center gap-1.5 text-sm py-2 px-3"
+                  title="Design in Webstudio"
+                >
+                  <Layers className="w-3.5 h-3.5" />
+                </Link>
                 <button
                   onClick={() => handleToggleActive(template)}
                   disabled={deleteTemplate.isPending || updateTemplate.isPending}

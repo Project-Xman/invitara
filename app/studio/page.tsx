@@ -1,5 +1,11 @@
-import { StudioShell } from './_components/StudioShell';
+import { WebstudioEmbed } from './_components/WebstudioEmbed';
 
-export default function StudioPage() {
-  return <StudioShell />;
+interface StudioPageProps {
+  searchParams: Promise<{ templateId?: string }>;
+}
+
+export default async function StudioPage({ searchParams }: StudioPageProps) {
+  const webstudioUrl = process.env.WEBSTUDIO_URL ?? null;
+  const { templateId } = await searchParams;
+  return <WebstudioEmbed webstudioUrl={webstudioUrl} templateId={templateId ?? null} />;
 }
