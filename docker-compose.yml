@@ -20,6 +20,55 @@ services:
       timeout: 5s
       retries: 5
 
+  # ━━━ MinIO (S3-compatible storage for Webstudio assets) ━━━
+  minio:
+    image: minio/minio:latest
+    container_name: invitara-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ━━━ Webstudio (Open-source visual website builder) ━━━
+  # Self-hosted at http://localhost:5173
+  # Docs: https://docs.webstudio.is/self-hosting
+  webstudio:
+    image: ghcr.io/webstudio-is/webstudio:latest
+    container_name: invitara-webstudio
+    restart: unless-stopped
+    ports:
+      - "5173:3000"
+    environment:
+      # Database (uses a separate schema to avoid conflicts with Invitara)
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/webstudio
+      # Auth — change AUTH_SECRET to a long random string in production
+      AUTH_SECRET: change-this-in-production-to-random-64-char-string
+      NEXTAUTH_URL: http://localhost:5173
+      # S3-compatible storage via MinIO
+      S3_ENDPOINT: http://minio:9000
+      S3_REGION: us-east-1
+      S3_BUCKET: webstudio-assets
+      S3_ACCESS_KEY_ID: minioadmin
+      S3_SECRET_ACCESS_KEY: minioadmin
+      # Webstudio app URL (used for preview/published sites)
+      BUILDER_ORIGIN: http://localhost:5173
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+
   # ━━━ Drizzle Studio (DB GUI) ━━━
   # Run: npm run db:studio
   # Opens at https://local.drizzle.studio
@@ -36,9 +85,14 @@ services:
       JWT_SECRET: change-this-in-production-to-random-64-char-string
       NODE_ENV: production
       PORT: 3000
+      # URL where Webstudio is running (for admin studio page integration)
+      WEBSTUDIO_URL: http://localhost:5173
     depends_on:
       postgres:
         condition: service_healthy
+      webstudio:
+        condition: service_started
 
 volumes:
   pgdata:
+  minio_data:
