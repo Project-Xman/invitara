@@ -35,6 +35,10 @@ const securityHeaders = [
     : []),
 ];
 
+// The studio page embeds the self-hosted Webstudio instance in an iframe.
+// We relax frame-src for that route to allow the configured WEBSTUDIO_URL.
+const webstudioUrl = process.env.WEBSTUDIO_URL ?? "http://localhost:5173";
+
 const nextConfig: NextConfig = {
   experimental: {
     serverActions: {
@@ -70,6 +74,16 @@ const nextConfig: NextConfig = {
           {
             key: "Cache-Control",
             value: "public, max-age=60, s-maxage=300, stale-while-revalidate=86400",
+          },
+        ],
+      },
+      {
+        // Allow the studio page to embed the Webstudio iframe
+        source: "/studio",
+        headers: [
+          {
+            key: "Content-Security-Policy",
+            value: `frame-src ${webstudioUrl};`,
           },
         ],
       },

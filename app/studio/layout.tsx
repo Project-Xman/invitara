@@ -4,7 +4,7 @@ import { getSession } from '~/lib/actions';
 
 export const metadata: Metadata = {
   title: 'Studio | Invitara',
-  description: 'Visual design studio',
+  description: 'Webstudio — visual design builder',
 };
 
 export default async function StudioLayout({ children }: { children: React.ReactNode }) {
@@ -12,7 +12,7 @@ export default async function StudioLayout({ children }: { children: React.React
   if (!user || !user.isAdmin) redirect('/');
 
   return (
-    <div className="h-screen w-screen overflow-hidden bg-neutral-950 text-white">
+    <div className="h-screen w-screen flex flex-col overflow-hidden bg-neutral-950 text-white">
       {children}
     </div>
   );
