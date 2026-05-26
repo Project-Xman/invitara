@@ -45,7 +45,7 @@ import {
   getPlansFromDB,
 } from "./purchases";
 import { getAdForSlot, trackAdImpression, trackAdClick, shouldShowAds, type AdSlot } from "./ads";
-import { assertRateLimit } from "./rate-limit";
+import { assertRateLimit, RateLimitError } from "./rate-limit";
 import { env } from "./env";
 
 // Helper: extract token from cookie header
@@ -106,12 +106,23 @@ export async function register(data: {
 }
 
 export async function login(data: { email: string; password: string }): Promise<SafeUser> {
-  // 10 login attempts per email per 15 minutes
-  assertRateLimit(`login:${data.email.toLowerCase()}`, 10, 15 * 60 * 1000);
-  const user = await loginUser(data);
-  const { token } = await createSession(user.id);
-  await setSessionCookie(token);
-  return toSafeUser(user);
+  try {
+    // 10 login attempts per email per 15 minutes
+    await assertRateLimit(`login:${data.email.toLowerCase()}`, 10, 15 * 60 * 1000);
+    const user = await loginUser(data);
+    const { token } = await createSession(user.id);
+    await setSessionCookie(token);
+    return toSafeUser(user);
+  } catch (err) {
+    console.error("[login]", err);
+    if (err instanceof RateLimitError) {
+      throw new Error(`Too many login attempts. Try again in ${err.retryAfter}s.`);
+    }
+    if (err instanceof Error && err.message === "Account suspended. Contact support.") {
+      throw err;
+    }
+    throw new Error("Invalid email or password.");
+  }
 }
 
 // ━━━ LOGOUT ━━━
