@@ -1,0 +1,39 @@
+/* Print styles for invite page. Hide nav/banners/ads/buttons, keep content. */
+@media print {
+  nav,
+  header,
+  footer,
+  [data-no-print],
+  .no-print,
+  button,
+  .ad-banner,
+  [data-ad-slot],
+  .cookie-consent,
+  [data-cookie-consent] {
+    display: none !important;
+  }
+  body,
+  html {
+    background: white !important;
+    color: black !important;
+  }
+  a {
+    color: inherit !important;
+    text-decoration: none !important;
+  }
+  img {
+    page-break-inside: avoid;
+    max-width: 100% !important;
+    height: auto !important;
+  }
+  h1,
+  h2,
+  h3 {
+    page-break-after: avoid;
+  }
+  .invite-card,
+  .invite-page {
+    box-shadow: none !important;
+    border: none !important;
+  }
+}

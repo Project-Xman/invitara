@@ -3,27 +3,58 @@
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { templatesQueryOptions, sessionQueryOptions, plansQueryOptions, adQueryOptions } from "~/lib/queries";
-import { AdBanner } from "~/components/AdBanner";
-
 import {
-  Banknote,
-  UserCheck,
-  MapPin,
-  Edit,
-  Music,
-  Lock,
-  Clock,
-  Eye,
-  Star,
-  ChevronRight,
-  Check,
-  Plus,
-  AlertCircle,
-  CheckCircle2,
+  templatesQueryOptions,
+  sessionQueryOptions,
+  plansQueryOptions,
+  adQueryOptions,
+} from "~/lib/queries";
+import { AdBanner } from "~/components/AdBanner";
+import { Spotlight } from "~/components/marketing/Spotlight";
+import { Hairline } from "~/components/marketing/Hairline";
+import { SectionEyebrow } from "~/components/marketing/SectionEyebrow";
+import { RevealOnScroll } from "~/components/marketing/RevealOnScroll";
+import { Marquee } from "~/components/marketing/Marquee";
+import { SpotlightCard } from "~/components/marketing/SpotlightCard";
+import { Bento, BentoItem } from "~/components/marketing/Bento";
+import { StatStrip } from "~/components/marketing/StatStrip";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "~/components/ui/accordion";
+import {
   ArrowRight,
-  Sparkles,
+  Banknote,
+  Check,
+  Clock,
+  Edit3,
+  Eye,
+  Lock,
+  MapPin,
+  Music,
+  Star,
+  UserCheck,
 } from "lucide-react";
+
+const HERO_PREVIEWS = [
+  {
+    gradient: "linear-gradient(135deg,#0A1A2E 0%,#1E3A5F 35%,#2D5F8A 65%,#F5C518 100%)",
+    label: "Royal",
+    name: "Midnight Vow",
+  },
+  {
+    gradient: "linear-gradient(180deg,#1A1A1A 0%,#2C2218 40%,#4A3520 70%,#D4A853 100%)",
+    label: "Editorial",
+    name: "City Royale",
+  },
+  {
+    gradient: "linear-gradient(135deg,#1A0A2E 0%,#4A1942 30%,#C8397E 65%,#FFD4E8 100%)",
+    label: "Romance",
+    name: "Rose Petal",
+  },
+];
 
 const CATEGORIES = [
   "All",
@@ -35,34 +66,75 @@ const CATEGORIES = [
   "Save the Date",
 ];
 
-const features = [
-  { icon: <Banknote className="h-6 w-6 text-primary" />, t: "Affordable", d: "Cheaper than printed cards & WhatsApp invites." },
-  { icon: <UserCheck className="h-6 w-6 text-primary" />, t: "Elder-Friendly", d: "Large text, clear layouts for every generation." },
-  { icon: <Eye className="h-6 w-6 text-primary" />, t: "Photo Highlights", d: "Pre-wedding shoot gallery built-in." },
-  { icon: <Edit className="h-6 w-6 text-primary" />, t: "Instant Edits", d: "Update anytime, even after sharing." },
-  { icon: <Star className="h-6 w-6 text-primary" />, t: "Ritual-Ready", d: "Deity motifs, mantras for every tradition." },
-  { icon: <Lock className="h-6 w-6 text-primary" />, t: "Private Events", d: "Separate links per event." },
-  { icon: <Clock className="h-6 w-6 text-primary" />, t: "Live Countdown", d: "Builds excitement for your big day." },
-  { icon: <MapPin className="h-6 w-6 text-primary" />, t: "Smart Links", d: "RSVP, maps, Instagram & WhatsApp built-in." },
-  { icon: <Music className="h-6 w-6 text-primary" />, t: "Background Music", d: "Add any MP3 track." },
+const FEATURES_BENTO: Array<{
+  size: "large" | "medium" | "small";
+  icon: React.ReactNode;
+  t: string;
+  d: string;
+}> = [
+  {
+    size: "large",
+    icon: <Edit3 className="h-5 w-5" />,
+    t: "Instant edits",
+    d: "Change a date, add a venue, swap a song — every guest sees it the moment you save. No reprints. No reshares.",
+  },
+  {
+    size: "medium",
+    icon: <Eye className="h-5 w-5" />,
+    t: "Photo highlights",
+    d: "Pre-wedding shoots, built into every invitation.",
+  },
+  {
+    size: "medium",
+    icon: <Music className="h-5 w-5" />,
+    t: "Music",
+    d: "Background score on autoplay. Any MP3.",
+  },
+  {
+    size: "small",
+    icon: <Banknote className="h-4 w-4" />,
+    t: "Affordable",
+    d: "Less than printed cards.",
+  },
+  {
+    size: "small",
+    icon: <UserCheck className="h-4 w-4" />,
+    t: "Elder-ready",
+    d: "Generous typography.",
+  },
+  {
+    size: "small",
+    icon: <Clock className="h-4 w-4" />,
+    t: "Live countdown",
+    d: "To the moment itself.",
+  },
+  {
+    size: "small",
+    icon: <MapPin className="h-4 w-4" />,
+    t: "Smart links",
+    d: "RSVP, maps, socials.",
+  },
 ];
 
-const faqs = [
-  {
-    q: "Do I need software to edit?",
-    a: "No -- everything is browser-based, fill a form, done in 10 minutes.",
-  },
-  {
-    q: "Why this over WhatsApp video?",
-    a: "Interactive websites -- RSVP, galleries, directions, live updates.",
-  },
-  { q: "Can I update after sharing?", a: "Yes, changes are instant for everyone." },
-  { q: "Is there an expiry?", a: "No, lifetime access once purchased." },
-  { q: "Can I add music?", a: "Yes, upload any MP3 file." },
-  {
-    q: "How does AI design work?",
-    a: "Describe your dream design, our AI generates custom color palettes and suggestions. Free with Chrome's built-in Gemini Nano, or 1 credit on server.",
-  },
+const FEATURES_SIDE = [
+  { icon: <Star className="h-4 w-4" />, t: "Ritual-aware", d: "Motifs for every tradition." },
+  { icon: <Lock className="h-4 w-4" />, t: "Private events", d: "Separate links per event." },
+];
+
+const FAQS = [
+  { q: "Do I need software to edit?", a: "No. Everything is browser-based. A form, a few photos, ten minutes — done." },
+  { q: "Why this over a WhatsApp video?", a: "An interactive site: RSVP, galleries, directions, live updates. A video can't reply to questions." },
+  { q: "Can I update after sharing?", a: "Yes. Changes are instant for everyone who has the link." },
+  { q: "Is there an expiry?", a: "No. Lifetime access once purchased." },
+  { q: "Can I add music?", a: "Any MP3 you upload becomes the score." },
+  { q: "How does AI design work?", a: "Describe your dream. Our AI generates a palette and suggestions. Free with on-device Gemini Nano in Chrome, or 1 credit on server." },
+];
+
+const STATS = [
+  { v: "500+", l: "Couples" },
+  { v: "11", l: "Templates" },
+  { v: "100%", l: "Browser-based" },
+  { v: "₹0", l: "Start free" },
 ];
 
 export default function HomeClient() {
@@ -71,258 +143,360 @@ export default function HomeClient() {
   const { data: user } = useQuery(sessionQueryOptions());
   const { data: plans = [] } = useQuery(plansQueryOptions());
   const { data: heroAd } = useQuery(adQueryOptions("hero_banner"));
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
+
+  const templatesList = (
+    tmpls as Array<{
+      id: string;
+      name: string;
+      description: string;
+      category: string;
+      gradient: string;
+      isFree: boolean;
+      price: number;
+    }>
+  ).slice(0, 6);
 
   return (
-    <div className="animate-fade-up">
-      {/* HERO */}
-      <section className="bg-dots-gold relative flex min-h-screen items-center justify-center overflow-hidden pt-[68px]">
-        <div className="absolute right-[-100px] top-[-100px] h-[500px] w-[500px] animate-float rounded-full bg-primary/[0.06] blur-[80px]" />
-        <div className="absolute bottom-[-50px] left-[-50px] h-[400px] w-[400px] animate-float-d rounded-full bg-primary/[0.05] blur-[70px]" />
-        <div className="relative z-10 max-w-[900px] px-6 text-center">
-          <div className="mb-8 inline-flex items-center gap-2.5 rounded-full border border-primary/[0.15] bg-primary/[0.08] px-5 py-2 text-xs font-medium uppercase tracking-[1.5px] text-primary">
-            <Sparkles className="h-3.5 w-3.5 animate-pulse" />
-            Now with AI Design Generation
+    <div>
+      {/* ── HERO ─────────────────────────────────────────── */}
+      <section className="relative isolate min-h-[92vh] overflow-hidden pt-[76px]">
+        <Spotlight origin="top" intensity={0.14} />
+
+        <div className="relative z-10 mx-auto flex min-h-[calc(92vh-76px)] max-w-[1320px] flex-col items-center gap-16 px-6 py-16 lg:flex-row lg:gap-20 lg:px-8 lg:py-20">
+          {/* Left: editorial headline */}
+          <div className="flex-1 max-w-3xl">
+            <RevealOnScroll variant="mask" duration={0.8}>
+              <SectionEyebrow number="00" label="Invitations, reimagined" className="mb-8" />
+            </RevealOnScroll>
+
+            <RevealOnScroll variant="mask" duration={1.0} delay={0.08} as="h1">
+              <span className="block font-display font-light leading-[0.92]" style={{ letterSpacing: "-0.03em" }}>
+                <span className="block text-[clamp(3rem,9vw,7rem)]">Love,</span>
+                <span className="block text-[clamp(3rem,9vw,7rem)] italic text-shimmer">in motion.</span>
+              </span>
+            </RevealOnScroll>
+
+            <RevealOnScroll variant="fadeUp" delay={0.3}>
+              <p className="mt-8 max-w-md text-base leading-relaxed text-muted-foreground md:text-lg">
+                A wedding invitation should feel like the moment itself — cinematic, alive,
+                unmistakably yours.
+              </p>
+            </RevealOnScroll>
+
+            <RevealOnScroll variant="fadeUp" delay={0.45}>
+              <div className="mt-10 flex flex-wrap items-center gap-4">
+                <Link href="/templates" className="btn-primary">
+                  Begin your story <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+                <Link href="/preview" className="btn-ghost">
+                  Watch the film
+                </Link>
+              </div>
+            </RevealOnScroll>
+
+            <RevealOnScroll variant="fadeUp" delay={0.6}>
+              <div className="mt-16">
+                <StatStrip stats={STATS} />
+              </div>
+            </RevealOnScroll>
           </div>
-          <h1 className="mb-6 font-display text-5xl font-bold leading-[1.05] md:text-7xl lg:text-8xl">
-            Website Templates for <span className="text-golden">Wedding Invites</span>
-          </h1>
-          <p className="mx-auto mb-10 max-w-[560px] font-body text-lg leading-relaxed text-muted-foreground md:text-xl">
-            Easy-to-customise, effortless to share. AI-powered design. Pick a style, add your story,
-            share in minutes.
-          </p>
-          <div className="flex flex-wrap justify-center gap-4">
-            <Link href="/templates" className="btn-gold">
-              Choose a Template
-            </Link>
-            <Link href="/preview" className="btn-gold-outline">
-              View Demo
-            </Link>
+
+          {/* Right: stacked phone-frame previews */}
+          <div className="hidden lg:flex w-[320px] flex-shrink-0 flex-col gap-4">
+            {HERO_PREVIEWS.map((p, i) => (
+              <RevealOnScroll key={p.name} variant="slideRight" delay={0.3 + i * 0.12}>
+                <div
+                  className="card-premium relative overflow-hidden"
+                  style={{ height: "200px" }}
+                >
+                  <div className="absolute inset-0" style={{ background: p.gradient }} />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+                  <div className="absolute bottom-5 left-5 right-5 z-10 flex items-end justify-between">
+                    <div>
+                      <div className="text-[8px] font-medium uppercase tracking-[0.35em] text-white/60">
+                        {p.label}
+                      </div>
+                      <div className="mt-1 font-display italic text-xl text-white">{p.name}</div>
+                    </div>
+                  </div>
+                </div>
+              </RevealOnScroll>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* AD */}
-      {(!user || user.showAds) && (
-        <div className="mx-auto mt-10 max-w-[1320px] px-6 lg:px-8">
-          <AdBanner user={user || null} slot="hero_banner" ad={heroAd ?? null} />
+      {/* ── MARQUEE ──────────────────────────────────────── */}
+      <Hairline />
+      <Marquee speed={45} className="py-6 border-y border-white/[0.04]">
+        {[...templatesList, ...templatesList].map((t, i) => (
+          <span
+            key={`${t.id}-${i}`}
+            className="mx-12 inline-flex items-center gap-4 font-display italic text-2xl font-light text-muted-foreground"
+          >
+            {t.name}
+            <span className="h-1 w-1 rounded-full bg-primary/40" />
+          </span>
+        ))}
+      </Marquee>
+      <Hairline />
+
+      {/* ── AD ───────────────────────────────────────────── */}
+      {(!user || user.showAds) && heroAd && (
+        <div className="mx-auto mt-12 max-w-[1320px] px-6 lg:px-8">
+          <AdBanner user={user || null} slot="hero_banner" ad={heroAd} />
         </div>
       )}
 
-      {/* TEMPLATES */}
-      <section className="mx-auto max-w-[1320px] px-6 py-24 lg:px-8">
-        <div className="mb-12 text-center">
-          <p className="section-label mb-3">Templates</p>
-          <h2 className="section-heading mb-3">
-            Designed for your Big Day
-          </h2>
-        </div>
-        <div className="mb-10 flex flex-wrap justify-center gap-2">
-          {CATEGORIES.map((c) => (
-            <button
-              key={c}
-              onClick={() => setCat(c)}
-              className={`rounded-full border px-5 py-2.5 text-xs font-semibold tracking-wide transition-all ${cat === c ? "border-primary bg-primary text-primary-foreground shadow-gold" : "border-border bg-card text-muted-foreground hover:border-primary/40"}`}
-            >
-              {c}
-            </button>
-          ))}
-        </div>
+      {/* ── TEMPLATES ────────────────────────────────────── */}
+      <section className="relative mx-auto max-w-[1320px] px-6 py-28 lg:px-8">
+        <RevealOnScroll variant="fadeUp" className="mb-14 max-w-2xl">
+          <SectionEyebrow number="01" label="The Collection" className="mb-5" />
+          <h2 className="section-headline">Stories, told beautifully.</h2>
+          <p className="mt-5 text-base text-muted-foreground">
+            {(tmpls as unknown[]).length} handcrafted templates · new designs added each season.
+          </p>
+        </RevealOnScroll>
+
+        <RevealOnScroll variant="fadeUp" delay={0.15}>
+          <div className="mb-12 flex flex-wrap gap-2">
+            {CATEGORIES.map((c) => (
+              <button
+                key={c}
+                onClick={() => setCat(c)}
+                className={
+                  "rounded-full border px-4 py-2 text-[11px] font-medium uppercase transition-all duration-300 " +
+                  (cat === c
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border/40 bg-transparent text-muted-foreground hover:border-primary/40 hover:text-foreground")
+                }
+                style={{ letterSpacing: "0.12em" }}
+              >
+                {c}
+              </button>
+            ))}
+          </div>
+        </RevealOnScroll>
+
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {(tmpls as any[]).map((t: any) => (
-            <Link
-              key={t.id}
-              href={`/editor?template=${t.id}`}
-              className="group relative overflow-hidden rounded-2xl border border-border bg-card transition-all duration-500 hover:-translate-y-2 hover:shadow-gold-lg"
-            >
-              {t.isFree && (
-                <span className="absolute right-3 top-3 z-30 rounded-full bg-emerald-500 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[1px] text-white">
-                  Free
-                </span>
-              )}
-              <div className="relative h-56 overflow-hidden">
-                <div
-                  className="absolute inset-0 transition-transform duration-700 group-hover:scale-105"
-                  style={{ background: t.gradient }}
-                />
-                <div className="absolute inset-0 z-10 flex items-center justify-center text-white">
-                  <div className="text-center">
-                    <h3 className="font-script text-3xl drop-shadow-md">Preview</h3>
-                    <span className="mt-1 block font-body text-[10px] uppercase tracking-[5px] opacity-60">
-                      {t.name}
+          {templatesList.map((t, i) => (
+            <RevealOnScroll key={t.id} variant="fadeUp" delay={Math.min(i * 0.06, 0.36)}>
+              <SpotlightCard className="card-premium relative overflow-hidden rounded-2xl">
+                <Link href={`/editor?template=${t.id}`} className="block">
+                  {t.isFree && (
+                    <span className="absolute right-4 top-4 z-30 rounded-full border border-primary/40 bg-background/60 px-2.5 py-0.5 text-[9px] font-medium uppercase tracking-[0.25em] text-primary backdrop-blur">
+                      Free
                     </span>
+                  )}
+                  <div className="relative h-60 overflow-hidden">
+                    <div
+                      className="absolute inset-0 transition-transform duration-700 group-hover/spot:scale-[1.04]"
+                      style={{ background: t.gradient }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent" />
                   </div>
-                </div>
-              </div>
-              <div className="p-5">
-                <div className="mb-1 text-[9px] font-semibold uppercase tracking-[2px] text-primary/60">
-                  {t.category}
-                </div>
-                <div className="mb-1 flex items-center gap-2">
-                  <span>{t.emoji}</span>
-                  <h3 className="font-display text-lg font-semibold">{t.name}</h3>
-                </div>
-                <p className="mb-3 text-xs text-muted-foreground">{t.description}</p>
-                <div className="flex items-center justify-between">
-                  <span className="font-display text-lg font-bold text-primary">
-                    {t.isFree ? "Free" : "\u20B9" + t.price.toLocaleString("en-IN")}
-                  </span>
-                  <span className="btn-gold !px-4 !py-1.5 !text-[9px]">
-                    Customize <ArrowRight className="h-3 w-3" />
-                  </span>
-                </div>
-              </div>
-            </Link>
+                  <div className="relative z-10 p-6">
+                    <div className="text-[9px] font-medium uppercase tracking-[0.4em] text-primary/70">
+                      {t.category}
+                    </div>
+                    <h3 className="mt-2 font-display italic text-2xl font-light">{t.name}</h3>
+                    <p className="mt-2 text-sm text-muted-foreground line-clamp-2">{t.description}</p>
+                    <div className="mt-5 flex items-center justify-between">
+                      <span className="font-display text-xl text-foreground">
+                        {t.isFree ? "Free" : "₹" + t.price.toLocaleString("en-IN")}
+                      </span>
+                      <span className="inline-flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-[0.3em] text-primary transition-all group-hover/spot:gap-2.5">
+                        Customise <ArrowRight className="h-3 w-3" />
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              </SpotlightCard>
+            </RevealOnScroll>
           ))}
+        </div>
+
+        <div className="mt-16 text-center">
+          <Link href="/templates" className="btn-outline-premium">
+            Browse the Collection <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
         </div>
       </section>
 
-      {/* FEATURES */}
-      <section className="bg-card py-24">
-        <div className="mx-auto max-w-[1320px] px-6 lg:px-8">
-          <div className="mb-14 text-center">
-            <p className="section-label mb-3">Features</p>
-            <h2 className="section-heading mb-3">
-              The Wedding Invite, Reinvented
-            </h2>
-          </div>
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
-            {features.map((f, i) => (
-              <div
-                key={i}
-                className="rounded-2xl border border-border bg-background p-7 transition-all hover:-translate-y-1 hover:shadow-card"
-              >
-                <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
+      <Hairline />
+
+      {/* ── FEATURES BENTO ───────────────────────────────── */}
+      <section className="mx-auto max-w-[1320px] px-6 py-28 lg:px-8">
+        <RevealOnScroll variant="fadeUp" className="mb-14 max-w-2xl">
+          <SectionEyebrow number="02" label="The Craft" className="mb-5" />
+          <h2 className="section-headline">Everything you need, nothing you don&apos;t.</h2>
+        </RevealOnScroll>
+
+        <RevealOnScroll variant="fadeUp" delay={0.1}>
+          <Bento>
+            {FEATURES_BENTO.map((f, i) => (
+              <BentoItem key={i} size={f.size}>
+                <div className="flex h-full flex-col">
+                  <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-full border border-primary/30 text-primary">
+                    {f.icon}
+                  </div>
+                  <h3
+                    className={
+                      f.size === "large"
+                        ? "font-display text-3xl font-light"
+                        : f.size === "medium"
+                        ? "font-display text-xl font-light"
+                        : "font-display text-base font-light"
+                    }
+                  >
+                    {f.t}
+                  </h3>
+                  <p
+                    className={
+                      "mt-2 text-muted-foreground " +
+                      (f.size === "small" ? "text-xs" : "text-sm leading-relaxed")
+                    }
+                  >
+                    {f.d}
+                  </p>
+                </div>
+              </BentoItem>
+            ))}
+          </Bento>
+        </RevealOnScroll>
+
+        <RevealOnScroll variant="fadeUp" delay={0.2}>
+          <div className="mt-6 grid grid-cols-1 gap-5 md:grid-cols-2">
+            {FEATURES_SIDE.map((f, i) => (
+              <div key={i} className="card-premium p-6">
+                <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-full border border-primary/30 text-primary">
                   {f.icon}
                 </div>
-                <h3 className="mb-2 font-display text-lg font-semibold">{f.t}</h3>
-                <p className="text-sm leading-relaxed text-muted-foreground">{f.d}</p>
+                <h3 className="font-display text-xl font-light">{f.t}</h3>
+                <p className="mt-2 text-sm text-muted-foreground">{f.d}</p>
               </div>
             ))}
           </div>
-        </div>
+        </RevealOnScroll>
       </section>
 
-      {/* PRICING */}
-      <section className="mx-auto max-w-[1320px] px-6 py-24 lg:px-8" id="pricing">
-        <div className="mb-14 text-center">
-          <p className="section-label mb-3">Pricing</p>
-          <h2 className="section-heading mb-3">Simple, Transparent Pricing</h2>
-        </div>
-        <div className="mx-auto grid max-w-5xl grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
-          {(plans as any[]).map((p, i) => (
-            <div
-              key={i}
-              className={`relative rounded-2xl p-7 text-center ${p.badge ? "scale-[1.02] border-2 border-primary bg-card shadow-gold-lg" : "border border-border bg-card"}`}
-            >
-              {p.badge && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-0.5 text-[9px] font-semibold uppercase tracking-[1px] text-primary-foreground">
-                  {p.badge}
-                </div>
-              )}
-              <h3 className="mb-1 font-display text-xl font-bold">{p.name}</h3>
-              <div className="mb-0.5 font-display text-4xl font-bold text-primary">
-                {p.price === 0 ? "Free" : "\u20B9" + p.price.toLocaleString("en-IN")}
-              </div>
-              <p className="mb-1 text-xs text-muted-foreground">{p.price === 0 ? "forever" : "one-time"}</p>
-              {p.showAds && (
-                <p className="mb-3 flex items-center justify-center gap-1 text-[10px] font-semibold text-amber-600">
-                  <AlertCircle className="h-3 w-3" /> Contains Ads
-                </p>
-              )}
-              {!p.showAds && p.price > 0 && (
-                <p className="mb-3 flex items-center justify-center gap-1 text-[10px] font-semibold text-emerald-600">
-                  <CheckCircle2 className="h-3 w-3" /> No Ads + {p.credits} AI Credits
-                </p>
-              )}
-              <div className="mb-6 space-y-2 text-left">
-                {(p.features as string[]).map((f: string, j: number) => (
-                  <div key={j} className="flex items-start gap-2 text-xs">
-                    <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 font-bold text-primary" />
-                    <span className="text-muted-foreground">{f}</span>
-                  </div>
-                ))}
-              </div>
-              <Link
-                href={p.id === "free" ? "/auth/register" : "/pricing"}
-                className={p.badge ? "btn-gold w-full" : "btn-gold-outline w-full"}
-              >
-                {p.id === "free" ? "Get Started Free" : "Choose Plan"}
-              </Link>
-            </div>
-          ))}
-        </div>
-      </section>
+      <Hairline />
 
-      {/* FAQ */}
-      <section className="bg-card py-24">
-        <div className="mx-auto max-w-2xl px-6">
-          <div className="mb-14 text-center">
-            <h2 className="section-heading">Questions? Answers.</h2>
-          </div>
-          {faqs.map((f, i) => (
-            <div key={i} className="border-b border-border">
-              <button
-                onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                className="group flex w-full items-center justify-between py-5 text-left"
-              >
-                <span className="pr-4 text-sm font-medium group-hover:text-primary">{f.q}</span>
-                <span
-                  className={`shrink-0 transition-transform ${openFaq === i ? "rotate-45" : ""}`}
+      {/* ── PRICING ──────────────────────────────────────── */}
+      <section id="pricing" className="mx-auto max-w-[1320px] px-6 py-28 lg:px-8">
+        <RevealOnScroll variant="fadeUp" className="mb-14 max-w-2xl">
+          <SectionEyebrow number="03" label="Pricing" className="mb-5" />
+          <h2 className="section-headline">One purchase. Lifetime access.</h2>
+          <p className="mt-5 text-base text-muted-foreground">
+            No subscriptions. No hidden cost. Pick a plan, share forever.
+          </p>
+        </RevealOnScroll>
+
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
+          {(
+            plans as Array<{
+              id: string;
+              name: string;
+              price: number;
+              credits: number;
+              showAds: boolean;
+              features: string[];
+              badge?: string;
+            }>
+          ).map((p, i) => {
+            const featured = !!p.badge;
+            return (
+              <RevealOnScroll key={p.id} variant="fadeUp" delay={i * 0.08}>
+                <div
+                  className={
+                    "relative h-full rounded-2xl border bg-card p-7 transition-all duration-500 " +
+                    (featured
+                      ? "border-primary/50 shadow-glow-champagne-lg"
+                      : "border-white/[0.06] shadow-elevation-2 hover:-translate-y-1 hover:shadow-elevation-3")
+                  }
                 >
-                  <Plus className="h-4 w-4 text-primary" />
-                </span>
-              </button>
-              <div
-                className={`overflow-hidden text-sm leading-relaxed text-muted-foreground transition-all ${openFaq === i ? "max-h-40 pb-5" : "max-h-0"}`}
-              >
-                {f.a}
-              </div>
-            </div>
-          ))}
+                  {featured && (
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-1 text-[9px] font-medium uppercase tracking-[0.25em] text-primary-foreground">
+                      {p.badge}
+                    </div>
+                  )}
+                  <h3 className="font-display italic text-xl font-light">{p.name}</h3>
+                  <div className="mt-3 flex items-baseline gap-2">
+                    <span className="font-display text-5xl font-light text-foreground">
+                      {p.price === 0 ? "Free" : "₹" + p.price.toLocaleString("en-IN")}
+                    </span>
+                    <span className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
+                      {p.price === 0 ? "forever" : "once"}
+                    </span>
+                  </div>
+                  <div className="mt-2 text-[10px] uppercase tracking-[0.3em]">
+                    {p.showAds ? (
+                      <span className="text-amber-500/80">Contains ads</span>
+                    ) : p.price > 0 ? (
+                      <span className="text-primary/80">No ads · {p.credits} AI credits</span>
+                    ) : (
+                      <span className="text-muted-foreground">&nbsp;</span>
+                    )}
+                  </div>
+
+                  <div className="mt-6 hairline" />
+
+                  <ul className="mt-6 space-y-3 text-left">
+                    {p.features.map((f, j) => (
+                      <li key={j} className="flex items-start gap-2.5 text-xs text-muted-foreground">
+                        <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
+                        <span>{f}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <Link
+                    href={p.id === "free" ? "/auth/register" : "/pricing"}
+                    className={
+                      "mt-8 inline-flex w-full justify-center " +
+                      (featured ? "btn-primary" : "btn-outline-premium")
+                    }
+                  >
+                    {p.id === "free" ? "Get Started Free" : "Choose Plan"}
+                  </Link>
+                </div>
+              </RevealOnScroll>
+            );
+          })}
         </div>
       </section>
 
-      {/* FOOTER */}
-      <footer className="bg-foreground px-6 py-16 text-background">
-        <div className="mx-auto grid max-w-[1320px] grid-cols-1 gap-12 md:grid-cols-3">
-          <div>
-            <div className="mb-3 font-script text-3xl text-primary">Invitara</div>
-            <p className="text-sm leading-relaxed opacity-50">
-              Beautiful, AI-powered wedding invitation websites. Inter font, golden wedding theme.
-            </p>
-          </div>
-          <div>
-            <h4 className="mb-5 text-[10px] font-semibold uppercase tracking-[2px] opacity-40">
-              Product
-            </h4>
-            {["Templates", "Features", "Pricing", "AI Design", "Demo"].map((l) => (
-              <p
-                key={l}
-                className="mb-3 cursor-pointer text-sm opacity-55 transition-opacity hover:opacity-100"
+      <Hairline />
+
+      {/* ── FAQ ──────────────────────────────────────────── */}
+      <section className="mx-auto max-w-3xl px-6 py-28 lg:px-8">
+        <RevealOnScroll variant="fadeUp" className="mb-12 text-center">
+          <SectionEyebrow number="04" label="Questions" className="mb-5 justify-center" />
+          <h2 className="section-headline">Answers.</h2>
+        </RevealOnScroll>
+
+        <RevealOnScroll variant="fadeUp" delay={0.1}>
+          <Accordion type="single" collapsible className="w-full">
+            {FAQS.map((f, i) => (
+              <AccordionItem
+                key={i}
+                value={`faq-${i}`}
+                className="border-b border-white/[0.06] last:border-none"
               >
-                {l}
-              </p>
+                <AccordionTrigger className="py-6 font-display text-xl font-light italic hover:no-underline">
+                  <span className="mr-4 text-sm not-italic text-primary/60">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  {f.q}
+                </AccordionTrigger>
+                <AccordionContent className="text-sm leading-relaxed text-muted-foreground">
+                  {f.a}
+                </AccordionContent>
+              </AccordionItem>
             ))}
-          </div>
-          <div>
-            <h4 className="mb-5 text-[10px] font-semibold uppercase tracking-[2px] opacity-40">
-              Support
-            </h4>
-            {["Contact Us", "Privacy Policy", "Terms", "Refund Policy"].map((l) => (
-              <p
-                key={l}
-                className="mb-3 cursor-pointer text-sm opacity-55 transition-opacity hover:opacity-100"
-              >
-                {l}
-              </p>
-            ))}
-          </div>
-        </div>
-        <div className="mx-auto mt-12 max-w-[1320px] border-t border-background/10 pt-8 text-center text-xs opacity-25">
-          {'\u00A9'} 2026 Invitara. All rights reserved.
-        </div>
-      </footer>
+          </Accordion>
+        </RevealOnScroll>
+      </section>
     </div>
   );
 }

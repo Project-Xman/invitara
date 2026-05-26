@@ -148,3 +148,103 @@ export async function sendPasswordResetEmail(to: string, token: string): Promise
     html,
   });
 }
+
+async function send(to: string, subject: string, body: string): Promise<void> {
+  if (process.env.NODE_ENV !== "production") {
+    console.log(`[DEV EMAIL] ${subject} → ${to}`);
+    return;
+  }
+  const resend = getResendClient();
+  if (!resend) {
+    console.warn(`[EMAIL] not configured. Skipping: ${subject} → ${to}`);
+    return;
+  }
+  await resend.emails.send({ from: FROM_EMAIL, to, subject, html: emailBase(body) });
+}
+
+export async function sendRsvpConfirmation(to: string, opts: {
+  guestName: string;
+  coupleNames: string;
+  status: string;
+  inviteUrl: string;
+}): Promise<void> {
+  const body = `
+    <h1 style="margin:0 0 8px;font-size:26px;color:#1a1209;">Thank you, ${opts.guestName} 💌</h1>
+    <p style="margin:0 0 16px;font-size:15px;color:#6b5a3a;line-height:1.6;">
+      Your RSVP for <strong>${opts.coupleNames}</strong>'s wedding has been recorded as <strong>${opts.status}</strong>.
+    </p>
+    <p style="margin:0 0 24px;font-size:14px;color:#9e8a5a;">
+      You can revisit the invite any time and update your response if plans change.
+    </p>
+    <a href="${opts.inviteUrl}" style="display:inline-block;background:#D4A853;color:#fff;padding:12px 28px;border-radius:30px;text-decoration:none;font-weight:600;">View invitation</a>
+  `;
+  await send(to, `RSVP confirmed — ${opts.coupleNames}'s wedding`, body);
+}
+
+export async function sendPaymentReceipt(to: string, opts: {
+  userName: string;
+  amount: string;
+  currency: string;
+  type: string;
+  invoiceUrl: string;
+}): Promise<void> {
+  const body = `
+    <h1 style="margin:0 0 8px;font-size:24px;color:#1a1209;">Payment received ✅</h1>
+    <p style="margin:0 0 16px;color:#6b5a3a;line-height:1.6;">Hi ${opts.userName}, we've received your payment.</p>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:24px;">
+      <tr><td style="padding:8px 0;color:#9e8a5a;font-size:13px;">Type</td><td style="text-align:right;font-weight:600;">${opts.type}</td></tr>
+      <tr><td style="padding:8px 0;color:#9e8a5a;font-size:13px;">Amount</td><td style="text-align:right;font-weight:600;">${opts.currency} ${opts.amount}</td></tr>
+    </table>
+    <a href="${opts.invoiceUrl}" style="display:inline-block;background:#D4A853;color:#fff;padding:12px 28px;border-radius:30px;text-decoration:none;font-weight:600;">Download invoice</a>
+  `;
+  await send(to, "Payment receipt — Invitara", body);
+}
+
+export async function sendPlanExpiryWarning(to: string, opts: {
+  userName: string;
+  plan: string;
+  daysLeft: number;
+  renewUrl: string;
+}): Promise<void> {
+  const body = `
+    <h1 style="margin:0 0 8px;font-size:24px;color:#1a1209;">Your ${opts.plan} plan expires in ${opts.daysLeft} day${opts.daysLeft === 1 ? "" : "s"}</h1>
+    <p style="margin:0 0 24px;color:#6b5a3a;line-height:1.6;">
+      Hi ${opts.userName}, your subscription renews soon. To keep premium templates, no ads, and unlimited publishing, renew below.
+    </p>
+    <a href="${opts.renewUrl}" style="display:inline-block;background:#D4A853;color:#fff;padding:12px 28px;border-radius:30px;text-decoration:none;font-weight:600;">Renew now</a>
+  `;
+  await send(to, `Your Invitara plan expires in ${opts.daysLeft} day${opts.daysLeft === 1 ? "" : "s"}`, body);
+}
+
+export async function sendInvitePublished(to: string, opts: {
+  userName: string;
+  coupleNames: string;
+  inviteUrl: string;
+}): Promise<void> {
+  const body = `
+    <h1 style="margin:0 0 8px;font-size:24px;color:#1a1209;">Your invitation is live! 🎉</h1>
+    <p style="margin:0 0 24px;color:#6b5a3a;line-height:1.6;">
+      Hi ${opts.userName}, your wedding invitation for ${opts.coupleNames} is ready to share.
+    </p>
+    <a href="${opts.inviteUrl}" style="display:inline-block;background:#D4A853;color:#fff;padding:12px 28px;border-radius:30px;text-decoration:none;font-weight:600;">View invite</a>
+    <p style="margin:24px 0 0;font-size:13px;color:#9e8a5a;">Or share directly: <span style="color:#5c4a1a;">${opts.inviteUrl}</span></p>
+  `;
+  await send(to, "Your wedding invitation is live", body);
+}
+
+export async function sendAccountDeletionScheduled(to: string, opts: {
+  userName: string;
+  scheduledFor: Date;
+  cancelUrl: string;
+}): Promise<void> {
+  const body = `
+    <h1 style="margin:0 0 8px;font-size:22px;color:#1a1209;">Account deletion scheduled</h1>
+    <p style="margin:0 0 16px;color:#6b5a3a;line-height:1.6;">
+      Hi ${opts.userName}, your Invitara account is scheduled for deletion on
+      <strong>${opts.scheduledFor.toDateString()}</strong>.
+    </p>
+    <p style="margin:0 0 24px;color:#6b5a3a;">If you change your mind before then, you can cancel anytime.</p>
+    <a href="${opts.cancelUrl}" style="display:inline-block;background:#D4A853;color:#fff;padding:12px 28px;border-radius:30px;text-decoration:none;font-weight:600;">Cancel deletion</a>
+  `;
+  await send(to, "Account deletion scheduled — Invitara", body);
+}

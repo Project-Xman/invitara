@@ -3,49 +3,36 @@ import React from "react";
 import "./globals.css";
 import { Providers } from "./providers";
 import { Navigation } from "./components/Navigation";
-import {
-  Inter,
-  Playfair_Display,
-  Cormorant_Garamond,
-  Great_Vibes,
-  Cinzel,
-  Dancing_Script,
-} from "next/font/google";
+import { Footer } from "./components/Footer";
+import { GrainOverlay } from "./components/marketing/GrainOverlay";
+import { Inter, Fraunces, Great_Vibes } from "next/font/google";
 import { cn } from "@/lib/utils";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
-const playfair = Playfair_Display({
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  display: "swap",
+});
+
+const fraunces = Fraunces({
   subsets: ["latin"],
   variable: "--font-display",
-  weight: ["400", "500", "600", "700", "800"],
-  style: ["normal", "italic"],
-});
-const cormorant = Cormorant_Garamond({
-  subsets: ["latin"],
-  variable: "--font-body",
   weight: ["300", "400", "500", "600", "700"],
   style: ["normal", "italic"],
+  display: "swap",
 });
+
 const greatVibes = Great_Vibes({
   subsets: ["latin"],
   variable: "--font-script",
   weight: ["400"],
-});
-const cinzel = Cinzel({
-  subsets: ["latin"],
-  variable: "--font-heading",
-  weight: ["400", "500", "600", "700"],
-});
-const dancingScript = Dancing_Script({
-  subsets: ["latin"],
-  variable: "--font-handwritten",
-  weight: ["400", "500", "600", "700"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "Invitara — Golden Wedding Invitations",
+  title: "Invitara — Love, in motion.",
   description:
-    "Beautiful, AI-powered wedding invitation websites. Pick a style, add your story, share in minutes.",
+    "Cinematic wedding invitation websites. AI-powered, beautifully crafted, instantly shareable.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -53,14 +40,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html
       lang="en"
       className={cn(
-        "font-sans theme-yellow",
+        "dark font-sans",
         inter.variable,
-        playfair.variable,
-        cormorant.variable,
-        greatVibes.variable,
-        cinzel.variable,
-        dancingScript.variable
+        fraunces.variable,
+        greatVibes.variable
       )}
+      suppressHydrationWarning
     >
       <head>
         <meta charSet="utf-8" />
@@ -68,8 +53,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="bg-background font-sans text-foreground antialiased min-h-screen selection:bg-primary/20">
         <Providers>
+          <GrainOverlay />
           <Navigation />
           {children}
+          <Footer />
         </Providers>
       </body>
     </html>

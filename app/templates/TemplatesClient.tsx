@@ -2,7 +2,9 @@
 
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { motion, LayoutGroup } from "framer-motion";
+import { toast } from "sonner";
 import {
   templatesQueryOptions,
   sessionQueryOptions,
@@ -12,6 +14,12 @@ import {
 } from "~/lib/queries";
 import { VirtualTemplateGrid } from "~/components/VirtualTemplateGrid";
 import { openRazorpayCheckout } from "~/lib/razorpay";
+import { Spotlight } from "~/components/marketing/Spotlight";
+import { SectionEyebrow } from "~/components/marketing/SectionEyebrow";
+import { RevealOnScroll } from "~/components/marketing/RevealOnScroll";
+import { Hairline } from "~/components/marketing/Hairline";
+import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
+import { Loader2 } from "lucide-react";
 
 const CATS = [
   "All",
@@ -23,8 +31,11 @@ const CATS = [
   "Save the Date",
 ];
 
+const SORTS = ["Latest", "Price ↑", "Popular"];
+
 export default function TemplatesClient() {
   const [cat, setCat] = useState("All");
+  const [sort, setSort] = useState("Latest");
   const [buyingId, setBuyingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const { data: tmpls = [], isLoading, isError } = useQuery(templatesQueryOptions(cat));
@@ -34,11 +45,23 @@ export default function TemplatesClient() {
   const buyTemplate = useBuyTemplate();
   const router = useRouter();
 
-  const ownedIds = (myTemplates as any[])
-    .filter((t: any) => t.owned)
-    .map((t: any) => t.id as string);
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+      setError(null);
+    }
+  }, [error]);
 
-  const handleSelect = async (t: any) => {
+  const ownedIds = (myTemplates as Array<{ id: string; owned?: boolean }>)
+    .filter((t) => t.owned)
+    .map((t) => t.id);
+
+  const handleSelect = async (t: {
+    id: string;
+    isFree?: boolean;
+    price: number;
+    name: string;
+  }) => {
     setError(null);
 
     if (t.isFree || ownedIds.includes(t.id)) {
@@ -68,83 +91,137 @@ export default function TemplatesClient() {
         razorpayOrderId: result.razorpay_order_id,
         razorpaySignature: result.razorpay_signature,
       });
+      toast.success(`Unlocked: ${t.name}`);
       router.push(`/editor?template=${t.id}`);
-    } catch (err: any) {
-      if (err?.message !== "Payment cancelled") {
-        setError(err?.message ?? "Payment failed. Please try again.");
-      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Payment failed. Please try again.";
+      if (msg !== "Payment cancelled") setError(msg);
     } finally {
       setBuyingId(null);
     }
   };
 
   return (
-    <div className="min-h-screen pt-[68px]">
-      <div className="mx-auto max-w-[1320px] px-6 py-16 lg:px-8">
-        <div className="mb-12 animate-fade-up text-center">
-          <p className="mb-3 text-[11px] font-semibold uppercase tracking-[3px] text-gold-600/70">
-            All Templates
-          </p>
-          <h1 className="mb-3 font-display text-4xl font-bold md:text-5xl">
-            Choose Your <span className="text-golden">Perfect Design</span>
-          </h1>
-          <p className="font-body text-lg text-cream-800/50">
-            {(tmpls as any[]).length} handcrafted templates
-          </p>
+    <div className="min-h-screen">
+      {/* ── Header ─────────────────────────────────────── */}
+      <section className="relative isolate overflow-hidden pt-[100px] pb-16">
+        <Spotlight origin="top" intensity={0.12} />
+        <div className="relative z-10 mx-auto max-w-[1320px] px-6 lg:px-8">
+          <RevealOnScroll variant="fadeUp">
+            <SectionEyebrow number="01" label="The Collection" className="mb-5" />
+          </RevealOnScroll>
+          <RevealOnScroll variant="mask" duration={0.9} delay={0.08}>
+            <h1 className="section-headline max-w-3xl">
+              Stories, told <span className="italic text-shimmer">beautifully.</span>
+            </h1>
+          </RevealOnScroll>
+          <RevealOnScroll variant="fadeUp" delay={0.25}>
+            <p className="mt-5 max-w-xl text-base text-muted-foreground">
+              {(tmpls as unknown[]).length} handcrafted designs · new additions each season.
+            </p>
+          </RevealOnScroll>
+        </div>
+      </section>
+
+      <Hairline />
+
+      <div className="mx-auto max-w-[1320px] px-6 py-10 lg:px-8">
+        {/* ── Filter strip ────────────────────────────── */}
+        <RevealOnScroll variant="fadeUp">
+          <LayoutGroup id="cat-filter">
+            <ScrollArea className="w-full whitespace-nowrap">
+              <div className="flex gap-1 pb-3">
+                {CATS.map((c) => {
+                  const active = cat === c;
+                  return (
+                    <button
+                      key={c}
+                      onClick={() => setCat(c)}
+                      className={
+                        "relative inline-flex items-center px-4 py-2 text-[11px] font-medium uppercase transition-colors duration-300 " +
+                        (active ? "text-foreground" : "text-muted-foreground hover:text-foreground")
+                      }
+                      style={{ letterSpacing: "0.18em" }}
+                    >
+                      {c}
+                      {active && (
+                        <motion.span
+                          layoutId="filter-indicator"
+                          className="absolute -bottom-0.5 left-3 right-3 h-px bg-primary"
+                          transition={{ type: "spring", stiffness: 400, damping: 35 }}
+                        />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+              <ScrollBar orientation="horizontal" />
+            </ScrollArea>
+          </LayoutGroup>
+        </RevealOnScroll>
+
+        {/* Sort row */}
+        <div className="mt-3 flex items-center gap-4 border-t border-white/[0.04] pt-4 text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
+          <span>Sort by</span>
+          <div className="flex gap-3">
+            {SORTS.map((s) => (
+              <button
+                key={s}
+                onClick={() => setSort(s)}
+                className={
+                  "transition-colors " +
+                  (sort === s ? "text-primary" : "hover:text-foreground")
+                }
+              >
+                {s}
+              </button>
+            ))}
+          </div>
         </div>
 
-        {error && (
-          <div className="mb-6 rounded-xl border border-red-200/40 bg-red-50 p-4 text-center text-sm text-red-600">
-            {error}
-            <button onClick={() => setError(null)} className="ml-3 text-xs underline">
-              Dismiss
-            </button>
-          </div>
-        )}
-
-        <div className="mb-10 flex flex-wrap justify-center gap-2">
-          {CATS.map((c) => (
-            <button
-              key={c}
-              onClick={() => setCat(c)}
-              className={`rounded-full border px-5 py-2.5 text-xs font-semibold tracking-wide transition-all duration-200 ${cat === c ? "border-gold-700 bg-gold-700 text-white shadow-gold" : "border-gold-200/25 bg-white text-cream-800/50 hover:border-gold-400"}`}
-            >
-              {c}
-            </button>
-          ))}
+        {/* ── Grid ────────────────────────────────────── */}
+        <div className="mt-10">
+          {isLoading ? (
+            <div className="flex items-center justify-center py-24">
+              <div className="flex flex-col items-center gap-4">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <p className="text-[10px] uppercase tracking-[0.4em] text-muted-foreground">
+                  Loading the collection
+                </p>
+              </div>
+            </div>
+          ) : isError ? (
+            <div className="py-24 text-center">
+              <p className="font-display italic text-2xl font-light text-destructive">
+                Failed to load templates
+              </p>
+              <p className="mt-3 text-sm text-muted-foreground">
+                Please check your database connection and try again.
+              </p>
+            </div>
+          ) : (tmpls as unknown[]).length === 0 ? (
+            <div className="py-24 text-center">
+              <p className="font-display italic text-2xl font-light text-muted-foreground">
+                No templates found{cat !== "All" ? ` in "${cat}"` : ""}
+              </p>
+              <p className="mt-3 text-sm text-muted-foreground">
+                Try a different category, or run{" "}
+                <code className="rounded-md bg-accent px-2 py-0.5 text-xs font-mono text-foreground">
+                  bun run db:seed
+                </code>{" "}
+                to populate templates.
+              </p>
+            </div>
+          ) : (
+            <VirtualTemplateGrid
+              templates={tmpls}
+              onSelect={handleSelect}
+              columns={3}
+              ownedIds={ownedIds}
+              buyingId={buyingId}
+            />
+          )}
         </div>
-
-        {isLoading ? (
-          <div className="flex items-center justify-center py-24">
-            <div className="h-8 w-8 animate-spin rounded-full border-2 border-gold-300 border-t-gold-700" />
-          </div>
-        ) : isError ? (
-          <div className="py-24 text-center">
-            <p className="mb-2 font-medium text-red-500">Failed to load templates</p>
-            <p className="text-sm text-cream-800/40">
-              Please check your database connection and try again.
-            </p>
-          </div>
-        ) : (tmpls as any[]).length === 0 ? (
-          <div className="py-24 text-center">
-            <p className="mb-2 font-medium text-cream-800/50">
-              No templates found{cat !== "All" ? ` in "${cat}"` : ""}
-            </p>
-            <p className="text-sm text-cream-800/30">
-              Try selecting a different category or run{" "}
-              <code className="rounded bg-cream-200 px-1.5 py-0.5 text-xs">bun run db:seed</code> to
-              populate templates.
-            </p>
-          </div>
-        ) : (
-          <VirtualTemplateGrid
-            templates={tmpls}
-            onSelect={handleSelect}
-            columns={3}
-            ownedIds={ownedIds}
-            buyingId={buyingId}
-          />
-        )}
       </div>
     </div>
   );

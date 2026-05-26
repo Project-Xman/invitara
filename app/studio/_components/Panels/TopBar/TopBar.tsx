@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useRef } from 'react';
+import Link from 'next/link';
 import { useStudioStore } from '~/studio/_lib/store';
 import { DeviceSwitcher } from './DeviceSwitcher';
 import { ZoomControls } from './ZoomControls';
@@ -23,23 +24,36 @@ export function TopBar() {
   const importRef = useRef<HTMLInputElement>(null);
 
   const saveLabel = useMemo(() => {
-    if (documentDirty) return 'Autosaving...';
+    if (documentDirty) return 'Autosaving';
     if (!lastSavedAt) return 'Ready';
     return `Saved ${new Date(lastSavedAt).toLocaleTimeString()}`;
   }, [documentDirty, lastSavedAt]);
 
+  const ghostBtn =
+    'px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.15em] text-muted-foreground hover:text-foreground rounded-full border border-border/40 hover:border-primary/60 transition-all';
+
   return (
-    <div className="flex items-center justify-between h-11 px-3 border-b border-neutral-800 bg-neutral-900 shrink-0">
-      <div className="flex items-center gap-3">
-        <span className="text-sm font-semibold tracking-tight">Studio</span>
-        <div className="w-px h-5 bg-neutral-700" />
+    <div
+      className="flex h-12 shrink-0 items-center justify-between border-b border-white/[0.06] px-4"
+      style={{
+        background: 'oklch(var(--background) / 0.80)',
+        backdropFilter: 'blur(24px) saturate(150%)',
+        WebkitBackdropFilter: 'blur(24px) saturate(150%)',
+      }}
+    >
+      {/* Left: wordmark + history */}
+      <div className="flex items-center gap-4">
+        <Link href="/dashboard" className="font-script text-[22px] leading-none text-primary">
+          Invitara
+        </Link>
+        <span className="h-4 w-px bg-white/10" />
         <PageSwitcher />
-        <div className="w-px h-5 bg-neutral-700" />
+        <span className="h-4 w-px bg-white/10" />
         <div className="flex items-center gap-1">
           <button
             onClick={undo}
             disabled={past.length === 0}
-            className="p-1.5 rounded hover:bg-neutral-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            className="rounded-full p-1.5 text-muted-foreground transition-colors hover:bg-white/[0.05] hover:text-foreground disabled:cursor-not-allowed disabled:opacity-30"
             title="Undo (Cmd+Z)"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -49,7 +63,7 @@ export function TopBar() {
           <button
             onClick={redo}
             disabled={future.length === 0}
-            className="p-1.5 rounded hover:bg-neutral-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            className="rounded-full p-1.5 text-muted-foreground transition-colors hover:bg-white/[0.05] hover:text-foreground disabled:cursor-not-allowed disabled:opacity-30"
             title="Redo (Cmd+Shift+Z)"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -57,16 +71,23 @@ export function TopBar() {
             </svg>
           </button>
         </div>
-        <span className="text-[10px] text-neutral-500">{saveLabel}</span>
+        <span
+          className="text-[10px] uppercase text-muted-foreground/70"
+          style={{ letterSpacing: '0.25em' }}
+        >
+          {saveLabel}
+        </span>
       </div>
 
+      {/* Center: toolbar + device + zoom */}
       <div className="flex items-center gap-3">
         <Toolbar />
-        <div className="w-px h-5 bg-neutral-700" />
+        <span className="h-4 w-px bg-white/10" />
         <DeviceSwitcher />
         <ZoomControls />
       </div>
 
+      {/* Right: file actions */}
       <div className="flex items-center gap-2">
         <button
           onClick={() => {
@@ -79,31 +100,26 @@ export function TopBar() {
             link.click();
             URL.revokeObjectURL(url);
           }}
-          className="px-2.5 py-1.5 text-xs font-medium bg-neutral-800 hover:bg-neutral-700 text-neutral-200 rounded transition-colors"
+          className={ghostBtn}
         >
           Export JSON
         </button>
-        <button
-          onClick={() => importRef.current?.click()}
-          className="px-2.5 py-1.5 text-xs font-medium bg-neutral-800 hover:bg-neutral-700 text-neutral-200 rounded transition-colors"
-        >
+        <button onClick={() => importRef.current?.click()} className={ghostBtn}>
           Import JSON
         </button>
-        <button
-          onClick={resetDocument}
-          className="px-2.5 py-1.5 text-xs font-medium bg-neutral-800 hover:bg-neutral-700 text-neutral-200 rounded transition-colors"
-        >
+        <button onClick={resetDocument} className={ghostBtn}>
           Reset
         </button>
-        <button
-          onClick={togglePreview}
-          className="px-3 py-1.5 text-xs font-medium bg-neutral-800 hover:bg-neutral-700 text-neutral-200 rounded transition-colors"
-        >
+        <button onClick={togglePreview} className={ghostBtn}>
           Preview
         </button>
         <button
           onClick={() => setExportDialogOpen(true)}
-          className="px-3 py-1.5 text-xs font-medium bg-indigo-600 hover:bg-indigo-500 rounded transition-colors"
+          className="rounded-full bg-primary px-4 py-1.5 text-[10px] font-medium uppercase tracking-[0.15em] text-primary-foreground transition-all hover:-translate-y-px"
+          style={{
+            boxShadow:
+              'inset 0 1px 0 oklch(1 0 0 / 0.18), 0 4px 12px -2px oklch(0 0 0 / 0.30)',
+          }}
         >
           Export
         </button>

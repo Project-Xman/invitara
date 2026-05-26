@@ -55,17 +55,23 @@ function MultiNodeInspector({ nodes: selectedNodes }: { nodes: StudioNode[] }) {
   );
 
   return (
-    <div className="divide-y divide-neutral-800">
-      <div className="p-3">
-        <div className="text-xs text-neutral-400 uppercase tracking-wider mb-1">Multiple Selection</div>
-        <div className="text-sm font-medium text-neutral-200">{selectedNodes.length} elements</div>
-        <div className="text-[11px] text-neutral-500 mt-0.5">
+    <div className="divide-y divide-white/[0.06]">
+      <div className="p-4">
+        <div className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
+          Multiple Selection
+        </div>
+        <div className="mt-2 font-display italic text-lg font-light text-foreground">
+          {selectedNodes.length} elements
+        </div>
+        <div className="mt-1 text-[11px] text-muted-foreground/70">
           {Array.from(new Set(selectedNodes.map((n) => n.type))).join(', ')}
         </div>
       </div>
 
-      <div className="p-3 space-y-3">
-        <div className="text-xs text-neutral-400 uppercase tracking-wider">Shared Properties</div>
+      <div className="space-y-3 p-4">
+        <div className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
+          Shared Properties
+        </div>
 
         <ColorPicker
           value={selectedNodes[0]?.style.backgroundColor ?? '#ffffff'}
@@ -73,8 +79,10 @@ function MultiNodeInspector({ nodes: selectedNodes }: { nodes: StudioNode[] }) {
           label="Background (all)"
         />
 
-        <label className="block space-y-1">
-          <span className="text-[10px] text-neutral-500">Opacity (all)</span>
+        <label className="block space-y-1.5">
+          <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+            Opacity (all)
+          </span>
           <div className="flex items-center gap-2">
             <input
               type="range"
@@ -83,34 +91,34 @@ function MultiNodeInspector({ nodes: selectedNodes }: { nodes: StudioNode[] }) {
               step={0.01}
               value={selectedNodes[0]?.style.opacity ?? 1}
               onChange={(e) => setAllOpacity(parseFloat(e.target.value))}
-              className="flex-1 accent-indigo-500"
+              className="flex-1 accent-[oklch(0.84_0.10_88)]"
             />
-            <span className="text-[11px] text-neutral-400 w-10 text-right tabular-nums">
+            <span className="w-10 text-right text-[11px] tabular-nums text-muted-foreground">
               {Math.round((selectedNodes[0]?.style.opacity ?? 1) * 100)}%
             </span>
           </div>
         </label>
       </div>
 
-      <div className="p-3 space-y-2">
-        <div className="text-xs text-neutral-400 uppercase tracking-wider">Actions</div>
+      <div className="space-y-2 p-4">
+        <div className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">Actions</div>
         <div className="flex gap-2">
           <button
             onClick={() => setAllVisibility(true)}
-            className="flex-1 py-1.5 text-[11px] bg-neutral-800 hover:bg-neutral-700 text-neutral-300 rounded transition-colors"
+            className="flex-1 rounded-full border border-border/40 py-1.5 text-[10px] uppercase tracking-[0.15em] text-muted-foreground transition-colors hover:border-primary/60 hover:text-foreground"
           >
             Show All
           </button>
           <button
             onClick={() => setAllVisibility(false)}
-            className="flex-1 py-1.5 text-[11px] bg-neutral-800 hover:bg-neutral-700 text-neutral-300 rounded transition-colors"
+            className="flex-1 rounded-full border border-border/40 py-1.5 text-[10px] uppercase tracking-[0.15em] text-muted-foreground transition-colors hover:border-primary/60 hover:text-foreground"
           >
             Hide All
           </button>
         </div>
         <button
           onClick={() => deleteNodes([...selectedIds])}
-          className="w-full py-1.5 text-[11px] bg-red-900/30 hover:bg-red-900/50 text-red-400 rounded transition-colors"
+          className="w-full rounded-full border border-destructive/30 py-1.5 text-[10px] uppercase tracking-[0.15em] text-destructive transition-colors hover:bg-destructive/10"
         >
           Delete {selectedNodes.length} elements
         </button>
@@ -128,26 +136,35 @@ export function RightPanel() {
   if (!rightPanelOpen) return null;
 
   const selectedNode = selectedIds.length === 1 ? nodes[selectedIds[0]] : null;
-  const multiSelected = selectedIds.length > 1 ? selectedIds.map((id) => nodes[id]).filter(Boolean) as StudioNode[] : [];
+  const multiSelected =
+    selectedIds.length > 1
+      ? (selectedIds.map((id) => nodes[id]).filter(Boolean) as StudioNode[])
+      : [];
 
   return (
-    <div className="w-72 shrink-0 border-l border-neutral-800 bg-neutral-900 flex flex-col overflow-y-auto">
+    <div className="flex w-72 shrink-0 flex-col overflow-y-auto border-l border-white/[0.06] bg-card text-foreground">
       {selectedIds.length === 0 ? (
-        <div className="flex items-center justify-center h-full text-xs text-neutral-500">
-          Select an element to inspect
+        <div className="flex h-full items-center justify-center px-6 text-center">
+          <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
+            Select an element to inspect
+          </p>
         </div>
       ) : multiSelected.length > 1 ? (
         <MultiNodeInspector nodes={multiSelected} />
       ) : selectedNode ? (
-        <div className="divide-y divide-neutral-800">
-          <div className="p-3">
-            <div className="text-xs text-neutral-400 uppercase tracking-wider mb-1">Element</div>
+        <div className="divide-y divide-white/[0.06]">
+          <div className="p-4">
+            <div className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
+              Element
+            </div>
             <input
               value={selectedNode.name}
               onChange={(e) => updateNode(selectedNode.id, { name: e.target.value })}
-              className="w-full text-sm font-medium text-neutral-200 bg-transparent border-b border-transparent hover:border-neutral-700 focus:border-indigo-500 focus:outline-none py-0.5"
+              className="mt-2 w-full border-b border-transparent bg-transparent py-0.5 font-display italic text-base font-light text-foreground hover:border-border/40 focus:border-primary/60 focus:outline-none"
             />
-            <div className="text-[11px] text-neutral-500 capitalize mt-0.5">{selectedNode.type}</div>
+            <div className="mt-1 text-[11px] uppercase tracking-[0.2em] text-muted-foreground/70">
+              {selectedNode.type}
+            </div>
           </div>
 
           <TransformInspector node={selectedNode} />

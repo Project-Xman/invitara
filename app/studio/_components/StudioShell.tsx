@@ -19,13 +19,27 @@ export function StudioShell() {
   const previewMode = useStudioStore((s) => s.previewMode);
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full flex-col bg-background text-foreground">
       <TopBar />
       <div className="flex flex-1 overflow-hidden">
         <LeftPanel />
-        <div className="flex-1 flex flex-col">
-          <div className="flex-1 relative">
-            <Canvas />
+        <div className="relative flex flex-1 flex-col">
+          {/* Cinematic canvas backdrop */}
+          <div
+            className="relative flex-1 overflow-hidden"
+            style={{ background: 'oklch(0.05 0.005 270)' }}
+          >
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0"
+              style={{
+                background:
+                  'radial-gradient(ellipse 60% 50% at 50% 0%, oklch(0.84 0.10 88 / 0.06), transparent 70%)',
+              }}
+            />
+            <div className="relative h-full">
+              <Canvas />
+            </div>
           </div>
           <AnimationTimeline />
         </div>
