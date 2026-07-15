@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   # ━━━ PostgreSQL Database ━━━
   postgres:
@@ -11,14 +9,19 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+      - ./docker/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d invitara"]
       interval: 5s
       timeout: 5s
       retries: 5
+      # First boot runs initdb + init-db.sql (~30s). Without this grace period
+      # the container burns all 5 retries and reports unhealthy before it is
+      # even meant to be up.
+      start_period: 60s
 
   # ━━━ MinIO (S3-compatible storage for Webstudio assets) ━━━
   minio:
@@ -30,15 +33,16 @@ services:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
     ports:
-      - "9000:9000"
-      - "9001:9001"
+      - "${MINIO_PORT:-9000}:9000"
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"
     volumes:
       - minio_data:/data
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
-      interval: 10s
+      # `mc ready` ships with the minio image; curl does not.
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 10
 
   # ━━━ Webstudio (Open-source visual website builder) ━━━
   # Self-hosted at http://localhost:5173
@@ -48,13 +52,13 @@ services:
     container_name: invitara-webstudio
     restart: unless-stopped
     ports:
-      - "5173:3000"
+      - "${WEBSTUDIO_PORT:-5173}:3000"
     environment:
       # Database (uses a separate schema to avoid conflicts with Invitara)
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/webstudio
       # Auth — change AUTH_SECRET to a long random string in production
       AUTH_SECRET: change-this-in-production-to-random-64-char-string
-      NEXTAUTH_URL: http://localhost:5173
+      NEXTAUTH_URL: http://localhost:${WEBSTUDIO_PORT:-5173}
       # S3-compatible storage via MinIO
       S3_ENDPOINT: http://minio:9000
       S3_REGION: us-east-1
@@ -62,7 +66,7 @@ services:
       S3_ACCESS_KEY_ID: minioadmin
       S3_SECRET_ACCESS_KEY: minioadmin
       # Webstudio app URL (used for preview/published sites)
-      BUILDER_ORIGIN: http://localhost:5173
+      BUILDER_ORIGIN: http://localhost:${WEBSTUDIO_PORT:-5173}
     depends_on:
       postgres:
         condition: service_healthy
@@ -74,19 +78,23 @@ services:
   # Opens at https://local.drizzle.studio
 
   # ━━━ App (Optional — for production) ━━━
+  # Behind the "prod" profile so `dev:stack` (which runs Next locally) does not
+  # start a second app container fighting for the same port.
+  # Start it with: docker compose --profile prod up -d app
   app:
     build: .
     container_name: invitara-app
+    profiles: ["prod"]
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "${APP_PORT:-3000}:3000"
     environment:
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/invitara
       JWT_SECRET: change-this-in-production-to-random-64-char-string
       NODE_ENV: production
       PORT: 3000
       # URL where Webstudio is running (for admin studio page integration)
-      WEBSTUDIO_URL: http://localhost:5173
+      WEBSTUDIO_URL: http://localhost:${WEBSTUDIO_PORT:-5173}
     depends_on:
       postgres:
         condition: service_healthy

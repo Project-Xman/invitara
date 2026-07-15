@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "next dev --port 3000",
+    "dev:stack": "bun run scripts/dev-stack.ts",
+    "dev:stack:down": "docker compose down",
     "build": "npm run db:migrate && next build",
     "start": "next start",
     "typecheck": "tsgo --noEmit",
@@ -92,6 +94,6 @@
     "vitest": "^2.1.8"
   },
   "optionalDependencies": {
-    "@sentry/nextjs": "^9.1.0"
+    "@sentry/nextjs": "^10.65.0"
   }
 }
