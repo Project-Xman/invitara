@@ -11,5 +11,9 @@ export default async function AdminLayout({
 }) {
   const user = await getSession();
   if (!user || !user.isAdmin) redirect("/");
-  return <AdminShell user={user}>{children}</AdminShell>;
+  return (
+    <AdminShell user={user} studioEnabled={Boolean(process.env.WEBSTUDIO_URL)}>
+      {children}
+    </AdminShell>
+  );
 }
