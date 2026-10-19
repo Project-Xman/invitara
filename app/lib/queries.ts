@@ -8,6 +8,12 @@ function handleMutationError(error: unknown, context?: string) {
   console.error(`${label}${message}`);
 }
 
+// Auth actions return `{ ok, ... }` (thrown messages are masked in production); rethrow client-side.
+function unwrap<T>(result: actions.ActionResult<T>): T {
+  if (!result.ok) throw new Error(result.error);
+  return result.data;
+}
+
 // ━━━ AUTH ━━━
 export const sessionQueryOptions = () =>
   queryOptions({
@@ -20,7 +26,7 @@ export function useRegister() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: { name: string; email: string; password: string; phone?: string }) =>
-      actions.register(data),
+      actions.register(data).then(unwrap),
     onSuccess: (user) => {
       qc.setQueryData(["session"], user);
     },
@@ -31,7 +37,7 @@ export function useRegister() {
 export function useLogin() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: { email: string; password: string }) => actions.login(data),
+    mutationFn: (data: { email: string; password: string }) => actions.login(data).then(unwrap),
     onSuccess: (user) => {
       qc.setQueryData(["session"], user);
     },
@@ -316,14 +322,14 @@ export const paymentHistoryQueryOptions = () =>
 // ━━━ PASSWORD RESET ━━━
 export function useForgotPassword() {
   return useMutation({
-    mutationFn: (data: { email: string }) => actions.forgotPassword(data),
+    mutationFn: (data: { email: string }) => actions.forgotPassword(data).then(unwrap),
     onError: (error) => handleMutationError(error, "Forgot password"),
   });
 }
 
 export function useResetPassword() {
   return useMutation({
-    mutationFn: (data: { token: string; password: string }) => actions.resetPassword(data),
+    mutationFn: (data: { token: string; password: string }) => actions.resetPassword(data).then(unwrap),
     onError: (error) => handleMutationError(error, "Reset password"),
   });
 }

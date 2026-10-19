@@ -20,7 +20,11 @@ export function VerifyEmailInner() {
     }
     actions
       .verifyEmail({ token })
-      .then(() => setStatus("success"))
+      .then((res) => {
+        if (res.ok) return setStatus("success");
+        setStatus("error");
+        setMessage(res.error);
+      })
       .catch((err: any) => {
         setStatus("error");
         setMessage(err?.message || "Verification failed. The link may have expired.");

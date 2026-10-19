@@ -79,6 +79,18 @@ async function clearSessionCookie() {
 }
 
 // ━━━ AUTH SERVER ACTIONS ━━━
+// Expected failures (bad password, duplicate email, rate limit) are returned, not thrown:
+// in production Next replaces a thrown server-action message with a generic digest error.
+export type ActionResult<T> = { ok: true; data: T } | { ok: false; error: string };
+
+function failure(err: unknown, fallback: string): { ok: false; error: string } {
+  if (err instanceof RateLimitError) {
+    return { ok: false, error: `Too many attempts. Try again in ${err.retryAfter}s.` };
+  }
+  console.error("[auth-action]", err);
+  return { ok: false, error: err instanceof Error && err.message ? err.message : fallback };
+}
+
 export async function getSession(): Promise<SafeUser | null> {
   const token = await getTokenFromCookies();
   if (!token) return null;
@@ -92,36 +104,41 @@ export async function register(data: {
   email: string;
   password: string;
   phone?: string;
-}): Promise<SafeUser> {
-  // 5 registrations per email per 15 minutes
-  assertRateLimit(`register:${data.email.toLowerCase()}`, 5, 15 * 60 * 1000);
-  const user = await registerUser(data);
-  const { token } = await createSession(user.id);
-  await setSessionCookie(token);
-  // Send verification email (fire-and-forget in dev; awaited in prod via email provider)
-  if (user.emailVerificationToken) {
-    sendVerificationEmail(user.email, user.emailVerificationToken).catch(console.error);
+}): Promise<ActionResult<SafeUser>> {
+  try {
+    // 5 registrations per email per 15 minutes
+    await assertRateLimit(`register:${data.email.toLowerCase()}`, 5, 15 * 60 * 1000);
+    const user = await registerUser(data);
+    const { token } = await createSession(user.id);
+    await setSessionCookie(token);
+    // Send verification email (fire-and-forget in dev; awaited in prod via email provider)
+    if (user.emailVerificationToken) {
+      sendVerificationEmail(user.email, user.emailVerificationToken).catch(console.error);
+    }
+    return { ok: true, data: toSafeUser(user) };
+  } catch (err) {
+    return failure(err, "Could not create account.");
   }
-  return toSafeUser(user);
 }
 
-export async function login(data: { email: string; password: string }): Promise<SafeUser> {
+export async function login(data: {
+  email: string;
+  password: string;
+}): Promise<ActionResult<SafeUser>> {
   try {
     // 10 login attempts per email per 15 minutes
     await assertRateLimit(`login:${data.email.toLowerCase()}`, 10, 15 * 60 * 1000);
     const user = await loginUser(data);
     const { token } = await createSession(user.id);
     await setSessionCookie(token);
-    return toSafeUser(user);
+    return { ok: true, data: toSafeUser(user) };
   } catch (err) {
     console.error("[login]", err);
-    if (err instanceof RateLimitError) {
-      throw new Error(`Too many login attempts. Try again in ${err.retryAfter}s.`);
-    }
+    if (err instanceof RateLimitError) return failure(err, "");
     if (err instanceof Error && err.message === "Account suspended. Contact support.") {
-      throw err;
+      return { ok: false, error: err.message };
     }
-    throw new Error("Invalid email or password.");
+    return { ok: false, error: "Invalid email or password." };
   }
 }
 
@@ -133,32 +150,44 @@ export async function logout(): Promise<void> {
 }
 
 // ━━━ EMAIL VERIFICATION ━━━
-export async function verifyEmail(data: { token: string }): Promise<{ success: true }> {
-  const verified = await verifyEmailToken(data.token);
-  if (!verified) throw new Error("Invalid or expired verification token.");
-  return { success: true };
+export async function verifyEmail(data: { token: string }): Promise<ActionResult<true>> {
+  try {
+    const verified = await verifyEmailToken(data.token);
+    if (!verified) return { ok: false, error: "Invalid or expired verification token." };
+    return { ok: true, data: true };
+  } catch (err) {
+    return failure(err, "Verification failed.");
+  }
 }
 
 // ━━━ FORGOT PASSWORD ━━━
-export async function forgotPassword(data: { email: string }): Promise<{ success: true }> {
-  // 3 requests per email per 15 minutes
-  assertRateLimit(`forgot:${data.email.toLowerCase()}`, 3, 15 * 60 * 1000);
-  const token = await createPasswordResetToken(data.email);
-  if (token) {
-    // Fire-and-forget in dev; awaited in prod via email provider
-    sendPasswordResetEmail(data.email, token).catch(() => {});
+export async function forgotPassword(data: { email: string }): Promise<ActionResult<true>> {
+  try {
+    // 3 requests per email per 15 minutes
+    await assertRateLimit(`forgot:${data.email.toLowerCase()}`, 3, 15 * 60 * 1000);
+    const token = await createPasswordResetToken(data.email);
+    if (token) {
+      // Fire-and-forget in dev; awaited in prod via email provider
+      sendPasswordResetEmail(data.email, token).catch(() => {});
+    }
+    // Always succeed to prevent email enumeration
+    return { ok: true, data: true };
+  } catch (err) {
+    return failure(err, "Could not send reset email.");
   }
-  // Always return success to prevent email enumeration
-  return { success: true };
 }
 
 export async function resetPassword(data: {
   token: string;
   password: string;
-}): Promise<{ success: true }> {
-  const ok = await resetPasswordWithToken(data.token, data.password);
-  if (!ok) throw new Error("Reset link is invalid or has expired.");
-  return { success: true };
+}): Promise<ActionResult<true>> {
+  try {
+    const ok = await resetPasswordWithToken(data.token, data.password);
+    if (!ok) return { ok: false, error: "Reset link is invalid or has expired." };
+    return { ok: true, data: true };
+  } catch (err) {
+    return failure(err, "Could not reset password.");
+  }
 }
 
 // ━━━ TEMPLATE SERVER ACTIONS ━━━

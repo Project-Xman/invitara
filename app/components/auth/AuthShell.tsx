@@ -65,6 +65,9 @@ export function AuthShell({
     <div className="relative isolate flex w-full flex-col items-center justify-center bg-background px-6 py-16 lg:w-[60%] lg:px-16">
       <Spotlight origin="center" intensity={0.06} />
       <div className="relative z-10 w-full max-w-md">
+        <Link href="/" className="mb-8 inline-flex font-script text-[40px] leading-none text-primary lg:hidden">
+          Invitara
+        </Link>
         {eyebrow && (
           <p className="section-eyebrow mb-6">
             <span className="chapter-num">00</span>
