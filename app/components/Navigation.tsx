@@ -25,7 +25,10 @@ export function Navigation() {
   if (
     pathname.startsWith("/invite/") ||
     pathname.startsWith("/admin") ||
-    pathname.startsWith("/studio")
+    pathname.startsWith("/studio") ||
+    // AuthShell renders its own branding; the global bar would overlay it
+    pathname === "/auth/login" ||
+    pathname === "/auth/register"
   ) {
     return null;
   }
