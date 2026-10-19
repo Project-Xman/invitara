@@ -15,8 +15,8 @@ import {
   SheetTrigger,
 } from "./ui/sheet";
 
-// The fixed overlay bar is hidden site-wide; flip to false to bring it back.
-const NAV_HIDDEN = true;
+// Set true to hide the fixed top bar site-wide.
+const NAV_HIDDEN = false;
 
 export function Navigation() {
   const pathname = usePathname();
