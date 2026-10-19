@@ -28,7 +28,7 @@ export function AnalyticsChart({
         {stats.map((s) => (
           <div
             key={s.label}
-            className="border-gold-200/12 rounded-xl border bg-white p-4 text-center"
+            className="border-gold-200/12 rounded-xl border bg-card p-4 text-center"
           >
             <span className="mb-1 block text-xl">{s.icon}</span>
             <p className={`font-display text-2xl font-bold ${s.color}`}>{s.value}</p>
@@ -41,7 +41,7 @@ export function AnalyticsChart({
 
       {/* Chart */}
       {daily.length > 0 && (
-        <div className="border-gold-200/12 rounded-2xl border bg-white p-6">
+        <div className="border-gold-200/12 rounded-2xl border bg-card p-6">
           <h4 className="mb-4 font-display text-lg font-semibold">Daily Views (14 days)</h4>
           <ResponsiveContainer width="100%" height={220}>
             <AreaChart data={daily}>

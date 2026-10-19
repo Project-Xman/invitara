@@ -56,7 +56,7 @@
     font-family: "Inter", sans-serif;
   }
   .card-gold {
-    @apply rounded-2xl border border-gold-200/15 bg-white transition-all duration-500 hover:-translate-y-1.5 hover:shadow-gold-lg;
+    @apply rounded-2xl border border-gold-200/15 bg-card transition-all duration-500 hover:-translate-y-1.5 hover:shadow-gold-lg;
   }
   .bg-dots-gold {
     background-image:

@@ -1,5 +1,5 @@
-import { useRef } from "react";
-import { useVirtualizer } from "@tanstack/react-virtual";
+import { useLayoutEffect, useRef, useState } from "react";
+import { useWindowVirtualizer } from "@tanstack/react-virtual";
 
 interface Template {
   id: string;
@@ -30,15 +30,20 @@ export function VirtualTemplateGrid({
 }) {
   const parentRef = useRef<HTMLDivElement>(null);
   const rows = Math.ceil(templates.length / columns);
-  const virt = useVirtualizer({
+  // The page scrolls, not a nested box: offset of the list from the top of the document.
+  const [scrollMargin, setScrollMargin] = useState(0);
+  useLayoutEffect(() => {
+    setScrollMargin(parentRef.current?.offsetTop ?? 0);
+  }, []);
+  const virt = useWindowVirtualizer({
     count: rows,
-    getScrollElement: () => parentRef.current,
     estimateSize: () => 440,
     overscan: 2,
+    scrollMargin,
   });
   const ownedSet = new Set(ownedIds);
   return (
-    <div ref={parentRef} className="max-h-[900px] overflow-y-auto rounded-2xl pr-1">
+    <div ref={parentRef} className="rounded-2xl">
       <div className="relative w-full" style={{ height: `${virt.getTotalSize()}px` }}>
         {virt.getVirtualItems().map((vRow) => {
           const start = vRow.index * columns;
@@ -46,8 +51,10 @@ export function VirtualTemplateGrid({
           return (
             <div
               key={vRow.key}
-              className="absolute left-0 w-full"
-              style={{ top: `${vRow.start}px`, height: `${vRow.size}px` }}
+              ref={virt.measureElement}
+              data-index={vRow.index}
+              className="absolute left-0 top-0 w-full"
+              style={{ transform: `translateY(${vRow.start - scrollMargin}px)` }}
             >
               <div
                 className="grid gap-6 pb-6"
@@ -66,7 +73,7 @@ export function VirtualTemplateGrid({
                       key={t.id}
                       role="button"
                       tabIndex={0}
-                      className={`border-gold-200/12 group relative overflow-hidden rounded-2xl border bg-white transition-all duration-500 hover:-translate-y-2 hover:shadow-gold-lg ${isLoading ? "cursor-wait" : "cursor-pointer"}`}
+                      className={`border-gold-200/12 group relative overflow-hidden rounded-2xl border bg-card text-card-foreground transition-all duration-500 hover:-translate-y-2 hover:shadow-gold-lg ${isLoading ? "cursor-wait" : "cursor-pointer"}`}
                       onClick={() => !isLoading && onSelect(t)}
                       onKeyDown={(e) => {
                         if ((e.key === "Enter" || e.key === " ") && !isLoading) {
@@ -107,9 +114,9 @@ export function VirtualTemplateGrid({
                           <span>{t.emoji}</span>
                           <h3 className="font-display text-lg font-semibold">{t.name}</h3>
                         </div>
-                        <p className="mb-3 text-xs opacity-40">{t.description}</p>
+                        <p className="mb-3 text-xs text-muted-foreground">{t.description}</p>
                         <div className="flex items-center justify-between">
-                          <span className="font-display text-lg font-bold text-gold-700">
+                          <span className="font-display text-lg font-bold text-primary">
                             {t.isFree ? "Free" : "₹" + t.price.toLocaleString("en-IN")}
                           </span>
                           <span
