@@ -2,7 +2,7 @@ export default function EditorLoading() {
   return (
     <div className="grid min-h-screen grid-cols-1 pt-[68px] lg:grid-cols-[380px_1fr]">
       {/* Sidebar skeleton */}
-      <div className="border-r border-gold-200/12 bg-white">
+      <div className="border-r border-gold-200/12 bg-card">
         {/* Tab bar */}
         <div className="flex border-b border-gold-200/12">
           {Array.from({ length: 5 }).map((_, i) => (
