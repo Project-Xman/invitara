@@ -15,6 +15,9 @@ import {
   SheetTrigger,
 } from "./ui/sheet";
 
+// The fixed overlay bar is hidden site-wide; flip to false to bring it back.
+const NAV_HIDDEN = true;
+
 export function Navigation() {
   const pathname = usePathname();
   const router = useRouter();
@@ -23,6 +26,7 @@ export function Navigation() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   if (
+    NAV_HIDDEN ||
     pathname.startsWith("/invite/") ||
     pathname.startsWith("/admin") ||
     pathname.startsWith("/studio") ||

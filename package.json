@@ -22,7 +22,8 @@
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
-    "db:seed": "tsx app/lib/seed.ts"
+    "db:seed": "tsx app/lib/seed.ts",
+    "db:admin": "tsx app/lib/create-admin.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
