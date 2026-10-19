@@ -50,9 +50,11 @@ function getBreadcrumb(pathname: string): string {
 
 export function AdminShell({
   user,
+  studioEnabled = false,
   children,
 }: {
   user: SafeUser;
+  studioEnabled?: boolean;
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
@@ -85,14 +87,14 @@ export function AdminShell({
                 transition-colors duration-150
                 ${
                   active
-                    ? "bg-background/10 text-primary"
-                    : "text-background/70 hover:bg-background/5 hover:text-background"
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:bg-foreground/5 hover:text-foreground"
                 }
               `}
             >
               <Icon
                 className={`h-4.5 w-4.5 flex-shrink-0 ${
-                  active ? "text-primary" : "text-background/50 group-hover:text-background/70"
+                  active ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
                 }`}
               />
               {label}
@@ -102,22 +104,24 @@ export function AdminShell({
       </nav>
 
       {/* Bottom user area */}
-      <div className="border-t border-background/10 px-4 py-4">
+      <div className="border-t border-border px-4 py-4">
         {/* Webstudio link */}
-        <Link
-          href="/studio"
-          onClick={() => setMobileOpen(false)}
-          className="mb-2 flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-background/70 transition-colors hover:bg-background/5 hover:text-background"
-        >
-          <Layers className="h-4 w-4" />
-          Design Studio
-        </Link>
-        <div className="mb-3 truncate px-2 text-sm text-background/60">
+        {studioEnabled && (
+          <Link
+            href="/studio"
+            onClick={() => setMobileOpen(false)}
+            className="mb-2 flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-foreground/5 hover:text-foreground"
+          >
+            <Layers className="h-4 w-4" />
+            Design Studio
+          </Link>
+        )}
+        <div className="mb-3 truncate px-2 text-sm text-muted-foreground">
           {user.name}
         </div>
         <Link
           href="/dashboard"
-          className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-background/70 transition-colors hover:bg-background/5 hover:text-background"
+          className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-foreground/5 hover:text-foreground"
         >
           <ArrowLeft className="h-4 w-4" />
           Exit to Site
@@ -129,7 +133,7 @@ export function AdminShell({
   return (
     <div className="flex h-screen overflow-hidden bg-background">
       {/* Desktop sidebar */}
-      <aside className="hidden w-[260px] flex-shrink-0 flex-col bg-foreground text-background lg:flex">
+      <aside className="hidden w-[260px] flex-shrink-0 flex-col border-r border-border bg-card text-foreground lg:flex">
         {sidebarContent}
       </aside>
 
@@ -144,7 +148,7 @@ export function AdminShell({
       {/* Mobile sidebar */}
       <aside
         className={`
-          fixed inset-y-0 left-0 z-50 flex w-[260px] flex-col bg-foreground text-background
+          fixed inset-y-0 left-0 z-50 flex w-[260px] flex-col border-r border-border bg-card text-foreground
           transition-transform duration-200 ease-in-out lg:hidden
           ${mobileOpen ? "translate-x-0" : "-translate-x-full"}
         `}
@@ -153,7 +157,7 @@ export function AdminShell({
         <button
           type="button"
           onClick={() => setMobileOpen(false)}
-          className="absolute right-3 top-3 rounded-md p-1 text-background/60 hover:text-background"
+          className="absolute right-3 top-3 rounded-md p-1 text-muted-foreground hover:text-foreground"
         >
           <X className="h-5 w-5" />
         </button>
